@@ -1,0 +1,25 @@
+﻿@inherits LayoutComponentBase
+
+<HeadContent>
+    <RadzenTheme Theme="dark" />
+</HeadContent>
+
+<RadzenComponents />
+
+<CascadingValue Value="@ToolbarContainer">
+<CascadingValue Value="@StatusBar">
+    <RadzenLayout>
+        <RadzenHeader style="--rz-header-min-height: 0px;">
+            <AppToolbar/>
+        </RadzenHeader>
+
+        <RadzenBody class="h-100 no-scroll-y rz-p-0">
+            @Body
+        </RadzenBody>
+
+        <RadzenFooter class="rz-p-2">
+            <StatusBar/>
+        </RadzenFooter>
+    </RadzenLayout>
+</CascadingValue>
+</CascadingValue>

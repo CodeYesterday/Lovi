@@ -1,0 +1,75 @@
+@page "/"
+
+<div style="min-width: 700px; max-width: 900px; margin: 0 auto;" class="h-100">
+    <RadzenRow class="w-100 h-100">
+
+        <RadzenColumn Size="6" class="rz-p-1">
+            <RadzenStack Orientation="Orientation.Vertical">
+                <RadzenStack Orientation="Orientation.Vertical">
+                    <RadzenText TextStyle="TextStyle.H5" Text="New session" />
+                    
+                    <RadzenCard Variant="Variant.Filled" class="w-100">
+                        <RadzenRow class="w-100">
+                            <RadzenColumn Size="12" class="rz-p-1">
+                                <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Start new session" class="w-100"
+                                              Icon="add_circle" Disabled="@DisableButtons"
+                                              Click="OnNewSession" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+                </RadzenStack>
+
+                <RadzenStack Orientation="Orientation.Vertical">
+                    <RadzenText TextStyle="TextStyle.H5" Text="Open session" />
+                    
+                    <RadzenCard Variant="Variant.Filled" class="w-100">
+                        <RadzenRow class="w-100">
+                            <RadzenColumn Size="6" class="rz-p-1">
+                                <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Open session" class="w-100"
+                                              Icon="folder_open" Disabled="@DisableButtons"
+                                              Click="_ => OnOpenSession(false)" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="6" class="rz-p-1">
+                                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Edit session" class="w-100"
+                                              Icon="edit" Disabled="@DisableButtons"
+                                              Click="_ => OnOpenSession(true)" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+                </RadzenStack>
+
+                <RadzenImage Path="logo.svg" class="w-100 rz-m-auto" />
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="6" class="rz-p-1 h-100">
+            <RadzenStack Orientation="Orientation.Vertical" class="h-100">
+                <RadzenText TextStyle="TextStyle.H5" Text="Recent session" />
+
+                <RadzenStack Orientation="Orientation.Vertical" Style="overflow-y: auto;">
+                    @foreach (var sessionDirectory in MruService.GetMruSessionDirectories())
+                    {
+                        <RadzenCard Variant="Variant.Filled" class="w-100">
+                            <RadzenStack Orientation="Orientation.Vertical" class="w-100">
+                                <RadzenText Text="@sessionDirectory" Style="word-wrap: break-word;" />
+
+                                <RadzenRow class="w-100">
+                                    <RadzenColumn Size="6" class="rz-p-1">
+                                        <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Open session" class="w-100"
+                                                      Icon="folder_open" Disabled="@DisableButtons"
+                                                      Click="_ => OnOpenSession(sessionDirectory, false)" />
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6" class="rz-p-1">
+                                        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Edit session" class="w-100"
+                                                      Icon="edit" Disabled="@DisableButtons"
+                                                      Click="_ => OnOpenSession(sessionDirectory, true)" />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenStack>
+                        </RadzenCard>
+                    }
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</div>

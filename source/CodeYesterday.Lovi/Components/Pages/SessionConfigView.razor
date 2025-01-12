@@ -1,0 +1,145 @@
+@page "/session_config"
+@using CodeYesterday.Lovi.Models
+
+@if (Session?.DataStorage is null)
+{
+    <RadzenText Text="No session loaded" />
+}
+else
+{
+    <div style="min-width: 600px; max-width: 800px; margin: 0 auto; padding: 1em;" class="h-100">
+        <RadzenStack Orientation="Orientation.Vertical" class="h-100">
+
+            @* Session directory *@
+            <RadzenFormField Text="Session directory" AllowFloatingLabel="false" class="w-100">
+                <RadzenTextBox Value="@Session.SessionDirectory" Disabled="true" class="w-100" />
+            </RadzenFormField>
+
+            @* Time import filter *@
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Start time" AllowFloatingLabel="false" class="w-100">
+                        <RadzenDatePicker TValue="DateTimeOffset?" @bind-value="@Session.SessionConfig.StartTime" class="w-100"
+                                          ShowTime="true" ShowSeconds="true" AllowClear="true" />
+                    </RadzenFormField>
+                </RadzenColumn>
+
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="End time" AllowFloatingLabel="false" class="w-100">
+                        <RadzenDatePicker TValue="DateTimeOffset?" @bind-value="@Session.SessionConfig.EndTime" class="w-100"
+                                          ShowTime="true" ShowSeconds="true" AllowClear="true" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Sources *@
+            <RadzenFormField Text="File sources" AllowFloatingLabel="false" class="w-100 flex-fill">
+                <ChildContent>
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0" class="h-100">
+                        <RadzenTree Data="@ImportSources" ItemLabelCssClass="w-100" class="w-100 h-100"
+                                    Style="--rz-tree-node-hover-background-color: transparent; --rz-tree-node-selected-background-color: transparent; overflow-y: auto;">
+
+                            <RadzenTreeLevel ChildrenProperty="@nameof(ImportSourceViewModel.SortedFiles)" Expanded="_ => true">
+                                <Template Context="sourceContext">
+                                    @{
+                                        var source = (ImportSourceViewModel)sourceContext.Value;
+
+                                        <RadzenStack Orientation="Orientation.Vertical" Gap="0" class="w-100">
+                                            <RadzenStack Orientation="Orientation.Horizontal" Gap="1em" AlignItems="AlignItems.Center" class="w-100">
+                                                <RadzenText Text="@source.Name" />
+
+                                                <RadzenStack Orientation="Orientation.Horizontal" Gap="1px" class="rz-ml-auto">
+                                                    <RadzenButton Icon="refresh" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small"
+                                                                  Click="_ => RefreshSource(source)" />
+                                                    <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                                                  Click="_ => RemoveSource(source)" />
+                                                </RadzenStack>
+                                            </RadzenStack>
+
+                                            <RadzenTextBox @bind-value="source.Filter" class="w-100" />
+
+                                            <RadzenStack Orientation="Orientation.Horizontal">
+                                                <RadzenCheckBox @bind-value="source.ImportAllFiles" Name="ImportAllFiles" />
+                                                <RadzenLabel Text="Import all files" Component="ImportAllFiles" />
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    }
+                                </Template>
+                            </RadzenTreeLevel>
+
+                            <RadzenTreeLevel HasChildren="_ => false">
+                                <Template Context="fileContext">
+                                    @{
+                                        var source = (ImportSourceViewModel)fileContext.ParentItem.Value;
+                                        var file = (ImportSourceFileViewModel)fileContext.Value;
+                                        <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+                                            @if (!source.ImportAllFiles)
+                                            {
+                                                <RadzenCheckBox @bind-value="file.IsSelected" />
+                                            }
+                                            <RadzenRow class="w-100">
+                                                <RadzenColumn Size="6">
+                                                    <RadzenText Text="@file.GetRelativeFileName(Session.SessionDirectory, source.Filter)"
+                                                                Style="@(file.IsMissing ? $"color: {Colors.Danger};" : string.Empty)" />
+                                                </RadzenColumn>
+
+                                                <RadzenColumn Size="3">
+                                                    <RadzenText Text="@file.GetDisplayFileSize()" />
+                                                </RadzenColumn>
+
+                                                <RadzenColumn Size="3">
+                                                    <RadzenText Text="@file.GetDisplayFileTime()" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+
+                                        </RadzenStack>
+                                    }
+                                </Template>
+                            </RadzenTreeLevel>
+                        </RadzenTree>
+
+                        <RadzenButton Icon="add" ButtonStyle="ButtonStyle.Success" Style="position: absolute; right: 0; bottom: 0;"
+                                      Click="AddSource" />
+                    </RadzenStack>
+                </ChildContent>
+            </RadzenFormField>
+
+            @* Log level filter properties *@
+            <RadzenFormField Text="Log level filter properties" AllowFloatingLabel="false" class="w-100">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" class="w-100">
+                    <RadzenBreadCrumb>
+                        @foreach (var property in LogLevelFilterProperties)
+                        {
+                            <RadzenBreadCrumbItem class="rz-m-1">
+                                <RadzenBadge BadgeStyle="BadgeStyle.Base" Style="text-transform: initial !important;">
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                                        @property
+                                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                                      Click="_ => OnRemoveLogLevelFilterProperty(property)"/>
+                                    </RadzenStack>
+                                </RadzenBadge>
+                            </RadzenBreadCrumbItem>
+                        }
+                    </RadzenBreadCrumb>
+
+                    <RadzenAutoComplete @bind-value="LogLevelPropertyInput" class="rz-ml-auto rz-my-1"
+                                        Data="@Session.DataStorage.Properties.Where(p => p.PropertyTypes.Contains(PropertyType.String)).Select(p => p.Name)" />
+                    <RadzenButton Icon="add" ButtonStyle="ButtonStyle.Success"
+                                  Click="OnAddLogLevelFilterProperty" />
+                </RadzenStack>
+            </RadzenFormField>
+
+            @* Buttons *@
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Open session"
+                          Click="OnOpenSession" />
+        </RadzenStack>
+    </div>
+}
+
+
+<style>
+    @* Extend the form field style *@
+    .rz-form-field-content {
+        height: 100%;
+    }
+</style>

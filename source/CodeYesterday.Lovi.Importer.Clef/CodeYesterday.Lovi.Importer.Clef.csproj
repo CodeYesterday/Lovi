@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.Formatting.Compact.Reader" Version="[4.1-dev*,5)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodeYesterday.Lovi.Abstractions\CodeYesterday.Lovi.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

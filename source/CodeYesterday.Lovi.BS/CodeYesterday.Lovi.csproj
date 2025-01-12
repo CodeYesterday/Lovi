@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <Import Project="../../common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Radzen.Blazor" Version="5.6.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodeYesterday.Lovi.Abstractions\CodeYesterday.Lovi.Abstractions.csproj" />
+    <ProjectReference Include="..\CodeYesterday.Lovi.Importer.Clef\CodeYesterday.Lovi.Importer.Clef.csproj" />
+  </ItemGroup>
+
+</Project>

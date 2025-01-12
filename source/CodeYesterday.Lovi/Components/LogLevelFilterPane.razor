@@ -1,0 +1,65 @@
+@using CodeYesterday.Lovi.Models
+
+@if (LogLevelFilter is null)
+{
+    <RadzenText Text="No session loaded" />
+}
+else
+{
+    <RadzenStack Orientation="Orientation.Vertical" class="w-100 h-100" Gap="5px">
+
+        <ToolbarControl Toolbar="@Toolbar"/>
+
+        <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap" class="w-100 rz-pr-1" Gap="0">
+            <RadzenText Text="@(string.Join(" / ", LogLevelFilter.ActualLayerProperties))" />
+
+            @LevelCheckBoxes(LogLevelFilter.RootLayer)
+        </RadzenStack>
+
+        
+        @* set hover and selected background color transparent to "hide" the selection feature. *@
+        <RadzenTree class="w-100 flex-fill" Data="@LogLevelFilter.RootLayer.SubLayers"
+                    Style="--rz-tree-node-hover-background-color: transparent; --rz-tree-node-selected-background-color: transparent; overflow-y: auto;"
+                    ItemLabelCssClass="w-100">
+            <RadzenTreeLevel ChildrenProperty="@(nameof(LogLevelFilterLayerModel.SubLayers))"
+                             HasChildren="@(layer => ((LogLevelFilterLayerModel)layer).SubLayers.Any())"
+                             Expanded="@(layer => ((LogLevelFilterLayerModel)layer).IsExpanded)">
+                <Template>
+                    @{
+                        var layer = (LogLevelFilterLayerModel)context.Value;
+                        <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap" class="w-100" Gap="0">
+                            <RadzenCheckBox @bind-value="@layer.ShowLayer"
+                                            TriState="@layer.IsShowLayerTriState"/>
+
+                            @{
+                                var (value, bold) = layer.Value switch
+                                {
+                                    null => ("<null>", true),
+                                    "" => ("<empty>", true),
+                                    _ => (layer.Value, false)
+                                };
+
+                                <RadzenText Text="@value" class="rz-mx-1" Style="@(bold ? "font-weight: bold;" : "")"/>
+                            }
+
+                            @LevelCheckBoxes(layer)
+                        </RadzenStack>
+                    }
+                </Template>
+            </RadzenTreeLevel>
+        </RadzenTree>
+    </RadzenStack>
+}
+
+@code
+{
+    RenderFragment LevelCheckBoxes(LogLevelFilterLayerModel layer) =>
+        @<RadzenStack Orientation="Orientation.Horizontal" Gap="0" class="rz-ml-auto">
+            @foreach (var logLevel in SettingsService.GetSettings().LogLevels)
+            {
+                <RadzenCheckBox @bind-value="@layer[logLevel]" class="rz-m-0"
+                                Style="@GetCheckBoxColorStyles(logLevel)"
+                                TriState="@layer.IsLevelTriState"/>
+            }
+        </RadzenStack>;
+}

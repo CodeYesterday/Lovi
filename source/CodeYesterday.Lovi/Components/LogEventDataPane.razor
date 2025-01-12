@@ -1,0 +1,18 @@
+<RadzenDataGrid @ref="_dataGrid" TItem="ItemModel" Data="@Data"
+                AllowGrouping="false" AllowColumnPicking="false" AllowColumnReorder="false" AllowFiltering="false"
+                RowRender="RowRender" LoadChildData="LoadChildData" 
+                Density="Density.Compact" class="w-100 h-100">
+    <Columns>
+        <RadzenDataGridColumn Title="Property" Property="@nameof(ItemModel.PropertyName)" 
+                              Width="150px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"/>
+        <RadzenDataGridColumn Title="Value" Property="@nameof(ItemModel.ValueMarkup)"
+                              Width="500px">
+            <Template Context="item">
+                @*TODO: Using a RadzenStack here is not optimal: Find something different to get the MouseEnter event*@
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0" MouseEnter="@(args => ShowValueTooltip(args, item))">
+                    @item.RenderedValue
+                </RadzenStack>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>

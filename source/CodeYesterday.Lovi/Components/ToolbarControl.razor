@@ -1,0 +1,57 @@
+@using CodeYesterday.Lovi.Input
+
+@code
+{
+    private const Variant ButtonVariant = Variant.Text;
+    private const ButtonSize ButtonSize = Radzen.ButtonSize.Medium;
+    private const ButtonStyle ButtonStyle = Radzen.ButtonStyle.Base;
+}
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0" class="tool-bar-style">
+    @if (Toolbar != null)
+    {
+        foreach (var toolBarItem in Toolbar.Items)
+        {
+            switch (toolBarItem)
+            {
+                case ToolbarButton button:
+                    <RadzenButton Text="@button.Title"
+                                  Icon="@button.Icon"
+                                  Visible="@button.IsVisible"
+                                  Disabled="@(!button.Command.CanExecute(button.CommandParameter))"
+                                  Variant="ButtonVariant" ButtonStyle="ButtonStyle" Size="ButtonSize"
+                                  Click="@(() => button.Command.Execute(button.CommandParameter))"
+                                  MouseEnter="e => OnShowToolbarItemTooltip(e, toolBarItem.Tooltip)" />
+                    break;
+
+                case ToolbarCheckBox checkBox:
+                    <RadzenButton Text="@checkBox.Title"
+                                  Icon="@(checkBox.IsChecked && !string.IsNullOrEmpty(checkBox.IsCheckedIcon) ? checkBox.IsCheckedIcon : checkBox.Icon)"
+                                  Visible="@checkBox.IsVisible"
+                                  Disabled="@checkBox.IsDisabled"
+                                  ButtonStyle="@(checkBox.IsChecked ? checkBox.IsCheckedButtonStyle : ButtonStyle)"
+                                  Variant="ButtonVariant" Size="ButtonSize"
+                                  Click="@(() => checkBox.IsChecked = !checkBox.IsChecked)"
+                                  MouseEnter="e => OnShowToolbarItemTooltip(e, checkBox.IsChecked ? checkBox.IsCheckedTooltip ?? checkBox.Tooltip : checkBox.Tooltip)" />
+                    break;
+
+                case ToolbarMenuButton menuButton:
+                    <RadzenButton Text="@menuButton.Title"
+                                  Icon="@menuButton.Icon"
+                                  Visible="@menuButton.IsVisible"
+                                  Variant="ButtonVariant" ButtonStyle="ButtonStyle" Size="ButtonSize"
+                                  Click="@(args => OpenButtonMenu(args, menuButton))"
+                                  MouseEnter="e => OnShowToolbarItemTooltip(e, toolBarItem.Tooltip)" />
+                    break;
+            }
+        }
+    }
+</RadzenStack>
+
+<style>
+    .tool-bar-style {
+        background-color: var(--rz-base-background-color);
+        padding: 1px 2px;
+        border-radius: 2px;
+    }
+</style>

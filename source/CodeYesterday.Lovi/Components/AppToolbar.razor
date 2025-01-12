@@ -1,0 +1,15 @@
+<RadzenStack Orientation="Orientation.Horizontal" Gap="0">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px">
+        @foreach (var toolBar in ToolbarContainer.Toolbars.Where(tb => tb.OrderIndex >= 0).OrderBy(tb => tb.OrderIndex))
+        {
+            <ToolbarControl Toolbar="@toolBar" />
+        }
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="rz-ml-auto">
+        @foreach (var toolBar in ToolbarContainer.Toolbars.Where(tb => tb.OrderIndex < 0).OrderBy(tb => tb.OrderIndex))
+        {
+            <ToolbarControl Toolbar="@toolBar" />
+        }
+    </RadzenStack>
+</RadzenStack>

@@ -1,0 +1,55 @@
+@using CodeYesterday.Lovi.Helper
+
+@if (SelectedItem is null)
+{
+    <RadzenText class="rz-m-auto" Text="No item selected"/>
+}
+else
+{
+    var logItemSettings = SettingsService.GetSettings().GetLogLevelSettings(SelectedItem.LogEvent.Level);
+
+    <RadzenSplitter Orientation="Orientation.Horizontal" class="flex-fill">
+        <RadzenSplitterPane Size="50%" Collapsible="false">
+            <RadzenStack Orientation="Orientation.Vertical" class="h-100 w-100 no-scroll-x no-scroll-y" Gap="0">
+                <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="4px">
+                    <RadzenIcon Icon="@logItemSettings.Icon" IconColor="@logItemSettings.Color" />
+
+                    <RadzenText Text="@(SelectedItem.LogEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"))"/>
+
+                    <RadzenButton Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-ml-auto"
+                                  Icon="content_copy"
+                                  Click="CopyMessage"/>
+                </RadzenStack>
+
+                <pre class="text-view flex-fill">
+                    @LogEventHtmlRenderer.RenderedMultiLineLogMessage(SelectedItem)
+                </pre>
+            </RadzenStack>
+        </RadzenSplitterPane>
+
+        <RadzenSplitterPane Size="50%" Collapsible="true">
+            <RadzenStack Orientation="Orientation.Vertical" class="h-100 w-100 no-scroll-x no-scroll-y" Gap="0">
+                <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="4px">
+                    <RadzenButton Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-ml-auto"
+                                  Icon="content_copy"
+                                  Disabled="@(SelectedItem.LogEvent.Exception is null)"
+                                  Click="CopyException" />
+                </RadzenStack>
+
+                <pre class="text-view flex-fill">
+                    @RenderedException(SelectedItem)
+                </pre>
+            </RadzenStack>
+        </RadzenSplitterPane>
+    </RadzenSplitter>
+}
+
+<style>
+    .text-view {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+        background-color: var(--rz-editor-content-background-color);
+        margin: 0;
+    }
+</style>

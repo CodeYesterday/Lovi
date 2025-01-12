@@ -1,0 +1,72 @@
+﻿@page "/"
+@using CodeYesterday.Lovi.Importer.Clef
+@using Serilog.Events
+
+<PageTitle>Home</PageTitle>
+
+<RadzenStack Orientation="Orientation.Vertical" class="h-100">
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenText TextStyle="TextStyle.DisplayH3" Text="Menu" />
+    </RadzenStack>
+
+    <RadzenDataGrid @ref="_dataGrid" Class="flex-fill w-100"
+    TItem="LogEvent" Data="@data" AllowColumnReorder="true" AllowColumnResize="true"
+    AllowFiltering="true" AllowSorting="true" AllowMultiColumnSorting="true" AllowGrouping="true"
+    AllowColumnPicking="true" AllowVirtualization="true" Density="Density.Compact"
+    SelectionMode="DataGridSelectionMode.Single" @bind-Value="selected">
+        <Columns>
+            <RadzenDataGridColumn Title="Level" Property="@nameof(LogEvent.Level)"
+            Width="100px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+            Groupable="true" Sortable="true" />
+
+            <RadzenDataGridColumn Title="Timestamp" Property="@nameof(LogEvent.Timestamp)"
+            Width="140px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+            Groupable="false" Sortable="true" SortOrder="SortOrder.Ascending" />
+
+            <RadzenDataGridColumn Title="Message"
+            Groupable="false" Sortable="true" SortProperty="@nameof(LogEvent.MessageTemplate)">
+                <Template Context="evt">
+                    @evt.RenderMessage();
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Message template" Property="@nameof(LogEvent.MessageTemplate)"
+            Sortable="true" />
+            <RadzenDataGridColumn Title="Exception" Property="@nameof(LogEvent.Exception)"
+            Sortable="true" />
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+
+@code {
+    List<LogEvent> data = new();
+    IList<LogEvent>? selected;
+    private RadzenDataGrid<LogEvent> _dataGrid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        try
+        {
+            var importer = new ClefImporter();
+            await foreach (var evt in importer.ImportLogsAsync("C:/logs/log.clef", CancellationToken.None).ConfigureAwait(true))
+            {
+                data.Add(evt);
+            }
+        }
+        catch (Exception ex)
+        {
+            data.Add(new(DateTime.Now, LogEventLevel.Error, ex, new("Import logfile failed", []), []));
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dataGrid.RefreshDataAsync().ConfigureAwait(true);
+        }
+    }
+
+}

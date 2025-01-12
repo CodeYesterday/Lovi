@@ -1,0 +1,60 @@
+@using CodeYesterday.Lovi.Models
+@using Serilog.Events
+
+@if (Model.Session?.DataStorage is null)
+{
+    <RadzenText Text="No session loaded"/>
+}
+else
+{
+    <div class="h-100" style="overflow-y: auto;">
+        <RadzenDataFilter @ref="_dataFilter" TItem="LogItemModel" Data="@Model.Session.PagedItems"
+                          FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                          Auto="false" ViewChanged="ViewChanged">
+            <Properties>
+                <RadzenDataFilterProperty Title="Level" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)}")">
+                </RadzenDataFilterProperty>
+
+                <RadzenDataFilterProperty Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")" FormatString="{0:yyyy-MM-dd HH:mm:ss.fff}"/>
+
+                <RadzenDataFilterProperty Title="Message" Property="@($"{nameof(LogItemModel.RenderedMessage)}")" />
+
+                <RadzenDataFilterProperty Title="Message template" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.MessageTemplate)}")"/>
+
+                <RadzenDataFilterProperty Title="Exception" Property="@($"{nameof(LogItemModel.ExceptionText)}")" />
+
+                @* Property columns *@
+                @if (Model.Session != null)
+                {
+                    foreach (var property in Model.Session.DataStorage.Properties)
+                    {
+                        foreach (var propertyType in property.PropertyTypes)
+                        {
+                            var (type, typeSuffix, propertyPrefix) = propertyType switch
+                            {
+                                PropertyType.String => (typeof(string), " (string)", "s:"),
+                                PropertyType.Float => (typeof(double?), " (float)", "f:"),
+                                PropertyType.Integer => (typeof(long?), " (int)", "i:"),
+                                PropertyType.Unsigned => (typeof(ulong?), " (uint)", "u:"),
+                                @* For now only support string filtering for complex properties
+                                PropertyType.List => (typeof(IReadOnlyList<LogEventPropertyValue>), " (list)", "l:"),
+                                PropertyType.Map => (typeof(IReadOnlyDictionary<ScalarValue, LogEventPropertyValue>), " (map)", "m:"),
+                                PropertyType.Object => (typeof(object), " (obj)", "o:"),
+                                *@
+                                _ => (typeof(string), string.Empty, string.Empty)
+                            };
+
+                            <RadzenDataFilterProperty Title="@(property.Name + (property.PropertyTypes.Count == 1 ? string.Empty : typeSuffix))" Type="@type"
+                                                      Property="@PropertyAccess.GetDynamicPropertyExpression(propertyPrefix + property.Name, type)">
+                            </RadzenDataFilterProperty>
+                        }
+                    }
+                }
+            </Properties>
+        </RadzenDataFilter>
+    </div>
+
+    <RadzenButton Style="position: absolute; bottom: 0; right: 0;"
+                  Text="Apply" ButtonStyle="ButtonStyle.Primary" 
+                  Click="ApplyFilter"/>
+}

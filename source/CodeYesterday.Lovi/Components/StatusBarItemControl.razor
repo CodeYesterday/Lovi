@@ -1,0 +1,9 @@
+@using CodeYesterday.Lovi.Models
+
+@switch (Item)
+{
+    case StatusBarTextItem textItem:
+        <RadzenText Text="@textItem.Text" class="rz-m-0"
+                    MouseEnter="e => OnShowItemTooltip(e, Item.Tooltip)" />
+        break;
+}

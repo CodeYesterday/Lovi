@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35514.174
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "source", "source", "{8EBA6980-3EF7-4881-86F7-EF82B8E69FAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeYesterday.Lovi.Abstractions", "source\CodeYesterday.Lovi.Abstractions\CodeYesterday.Lovi.Abstractions.csproj", "{56833FF9-2D96-4C04-A102-FEFFAE13E665}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeYesterday.Lovi.Importer.Clef", "source\CodeYesterday.Lovi.Importer.Clef\CodeYesterday.Lovi.Importer.Clef.csproj", "{F1C9BD05-1A3D-4CDA-B27F-78B96BBDE53A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F0BCA2F5-2E75-4B5E-9EE4-E83108B7CF68}"
+	ProjectSection(SolutionItems) = preProject
+		common.props = common.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2B82F6F7-0106-4940-8A91-C8B89660746C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClefFileGenerator", "test\ClefFileGenerator\ClefFileGenerator.csproj", "{345873F4-4069-43DA-A1A2-27BC6ACA1566}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeYesterday.Lovi", "source\CodeYesterday.Lovi\CodeYesterday.Lovi.csproj", "{EB1DE17C-5E2D-4156-A411-D0D44B317184}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{56833FF9-2D96-4C04-A102-FEFFAE13E665}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56833FF9-2D96-4C04-A102-FEFFAE13E665}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56833FF9-2D96-4C04-A102-FEFFAE13E665}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56833FF9-2D96-4C04-A102-FEFFAE13E665}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1C9BD05-1A3D-4CDA-B27F-78B96BBDE53A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1C9BD05-1A3D-4CDA-B27F-78B96BBDE53A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1C9BD05-1A3D-4CDA-B27F-78B96BBDE53A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1C9BD05-1A3D-4CDA-B27F-78B96BBDE53A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{345873F4-4069-43DA-A1A2-27BC6ACA1566}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{345873F4-4069-43DA-A1A2-27BC6ACA1566}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{345873F4-4069-43DA-A1A2-27BC6ACA1566}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{345873F4-4069-43DA-A1A2-27BC6ACA1566}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB1DE17C-5E2D-4156-A411-D0D44B317184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB1DE17C-5E2D-4156-A411-D0D44B317184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB1DE17C-5E2D-4156-A411-D0D44B317184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB1DE17C-5E2D-4156-A411-D0D44B317184}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{56833FF9-2D96-4C04-A102-FEFFAE13E665} = {8EBA6980-3EF7-4881-86F7-EF82B8E69FAF}
+		{F1C9BD05-1A3D-4CDA-B27F-78B96BBDE53A} = {8EBA6980-3EF7-4881-86F7-EF82B8E69FAF}
+		{345873F4-4069-43DA-A1A2-27BC6ACA1566} = {2B82F6F7-0106-4940-8A91-C8B89660746C}
+		{EB1DE17C-5E2D-4156-A411-D0D44B317184} = {8EBA6980-3EF7-4881-86F7-EF82B8E69FAF}
+	EndGlobalSection
+EndGlobal

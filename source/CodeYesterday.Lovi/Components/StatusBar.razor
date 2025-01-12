@@ -1,0 +1,58 @@
+<RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px">
+        @foreach (var item in StatusBarModel.Items.Where(tb => tb.OrderIndex >= 0).OrderBy(tb => tb.OrderIndex))
+        {
+            if (item.IsVisible)
+            {
+                <StatusBarItemControl Item="@item" />
+            }
+        }
+    </RadzenStack>
+
+    @* Progress indicator *@
+    @{
+        var progressModel = ProgressModel;
+        if (progressModel is not null)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" class="flex-fill">
+                <RadzenStack Orientation="Orientation.Vertical" Gap="1px" class="flex-fill">
+                    <RadzenStack Orientation="Orientation.Horizontal" class="w-100" Gap="0.5em">
+                        <RadzenText Text="@progressModel.Action"/>
+                        <RadzenText Text="@progressModel.Item" class="rz-ml-auto"/>
+                    </RadzenStack>
+
+                    @if (progressModel.SecondaryProgress.HasValue)
+                    {
+                        <RadzenProgressBar Min="0" Max="100"
+                                           Value="@progressModel.SecondaryProgress.Value.ValueAsPercent"
+                                           Mode="@(progressModel.SecondaryProgress.Value.IsIndeterminate ? ProgressBarMode.Indeterminate : ProgressBarMode.Determinate)"
+                                           ShowValue="@(!progressModel.SecondaryProgress.Value.IsIndeterminate)"/>
+                    }
+                    <RadzenProgressBar Min="0" Max="100"
+                                       Value="progressModel.MainProgress.ValueAsPercent"
+                                       Mode="@(progressModel.MainProgress.IsIndeterminate ? ProgressBarMode.Indeterminate : ProgressBarMode.Determinate)"
+                                       ShowValue="@(!progressModel.MainProgress.IsIndeterminate)"/>
+                </RadzenStack>
+
+                @if (progressModel.CancelCallback is not null)
+                {
+                    <RadzenButton Icon="cancel" Text="Cancel" ButtonStyle="ButtonStyle.Danger"
+                                  Disabled="@(!progressModel.CanCancel)"
+                                  Click="() => progressModel.CancelCallback()"/>
+                }
+            </RadzenStack>
+        }
+    }
+    
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="rz-ml-auto">
+        @foreach (var item in StatusBarModel.Items.Where(tb => tb.OrderIndex < 0).OrderBy(tb => tb.OrderIndex))
+        {
+            if (item.IsVisible)
+            {
+                <StatusBarItemControl Item="@item" />
+            }
+        }
+    </RadzenStack>
+
+</RadzenStack>
