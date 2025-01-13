@@ -1,4 +1,5 @@
-﻿using CodeYesterday.Lovi.Models;
+﻿using CodeYesterday.Lovi.Extensions;
+using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
 using CodeYesterday.Lovi.Session;
 using CommunityToolkit.Maui.Storage;
@@ -11,6 +12,9 @@ public partial class StartView
 {
     [Inject]
     private NotificationService NotificationService { get; set; } = default!;
+
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
 
     [Inject]
     private IProgressIndicator ProgressIndicator { get; set; } = default!;
@@ -39,21 +43,70 @@ public partial class StartView
 
             if (result.Exception is not null) throw result.Exception;
 
-            if (!result.IsSuccessful || result.Folder?.Path is null) return;
+            var sessionDirectory = result.Folder?.Path;
+            if (!result.IsSuccessful || sessionDirectory is null) return;
 
-            var session = new LogSession(result.Folder.Path)
+            if (LogSession.SessionInfoFileExists(sessionDirectory))
             {
-                ImporterManager = ImporterManager
-            };
+                var choice = await DialogService.ShowMultipleChoiceDialogAsync(
+                    "Log session found in directory",
+                    "The selected directory already contains a log session.",
+                    [
+                        new MultipleChoiceOptionModel
+                        {
+                            Id = 1,
+                            Title = "Edit session",
+                            Icon = "folder_open",
+                            Description = "Open the log session in edit mode instead.",
+                            ButtonText = "Edit session",
+                            ButtonStyle = ButtonStyle.Primary
+                        },
+                        new MultipleChoiceOptionModel
+                        {
+                            Id = 2,
+                            Title = "Open session",
+                            Icon = "edit",
+                            Description = "Open the log session instead.",
+                            ButtonText = "Open session",
+                            ButtonStyle = ButtonStyle.Secondary
+                        },
+                        new MultipleChoiceOptionModel
+                        {
+                            Id = 3,
+                            Title = "Overwrite session",
+                            Icon = "add_circle",
+                            IconStyle = IconStyle.Danger,
+                            Description = "Open the log session instead.",
+                            ButtonText = "Create new session",
+                            ButtonStyle = ButtonStyle.Danger
+                        },
+                        new MultipleChoiceOptionModel
+                        {
+                            Id = null,
+                            Title = "Cancel",
+                            Icon = "cancel",
+                            Description = "Do nothing.",
+                            ButtonText = "Cancel",
+                            ButtonStyle = ButtonStyle.Base
+                        }
+                    ]).ConfigureAwait(true);
 
-            await session.CreateNewSessionAsync(LogSession.InMemorySessionDataStorageId, CancellationToken.None)
-                .ConfigureAwait(true);
+                switch (choice)
+                {
+                    case 1:
+                    case 2:
+                        await OnOpenSession(sessionDirectory, choice == 1).ConfigureAwait(true);
+                        return;
 
-            MruService.SetMruSessionDirectory(session.SessionDirectory);
+                    case 3:
+                        // continue below
+                        break;
 
-            Model.Session = session;
+                    default: return;
+                }
+            }
 
-            NavigationManager.NavigateTo("/session_config");
+            await OnNewSessionAsync(sessionDirectory).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -66,6 +119,23 @@ public partial class StartView
         }
     }
 
+    private async Task OnNewSessionAsync(string sessionDirectory)
+    {
+        var session = new LogSession(sessionDirectory)
+        {
+            ImporterManager = ImporterManager
+        };
+
+        await session.CreateNewSessionAsync(LogSession.InMemorySessionDataStorageId, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        MruService.SetMruSessionDirectory(session.SessionDirectory);
+
+        Model.Session = session;
+
+        NavigationManager.NavigateTo("/session_config");
+    }
+
     private async Task OnOpenSession(bool openConfigView)
     {
         try
@@ -76,9 +146,44 @@ public partial class StartView
 
             if (result.Exception is not null) throw result.Exception;
 
-            if (!result.IsSuccessful || result.Folder?.Path is null) return;
+            var sessionDirectory = result.Folder?.Path;
+            if (!result.IsSuccessful || sessionDirectory is null) return;
 
-            await OnOpenSession(result.Folder.Path, openConfigView).ConfigureAwait(true);
+            if (!LogSession.SessionInfoFileExists(sessionDirectory))
+            {
+                var choice = await DialogService.ShowMultipleChoiceDialogAsync(
+                    "Log session not found in directory",
+                    "The selected directory does not contains a log session.",
+                    [
+                        new MultipleChoiceOptionModel
+                        {
+                            Id = 1,
+                            Title = "Create new session",
+                            Icon = "add_circle",
+                            Description = "Create a new session instead.",
+                            ButtonText = "Create session",
+                            ButtonStyle = ButtonStyle.Primary
+                        },
+                        new MultipleChoiceOptionModel
+                        {
+                            Id = null,
+                            Title = "Cancel",
+                            Icon = "cancel",
+                            Description = "Do nothing.",
+                            ButtonText = "Cancel",
+                            ButtonStyle = ButtonStyle.Base
+                        }
+                    ])
+                    .ConfigureAwait(true);
+
+                if (choice == 1)
+                {
+                    await OnNewSessionAsync(sessionDirectory).ConfigureAwait(true);
+                }
+                return;
+            }
+
+            await OnOpenSession(sessionDirectory, openConfigView).ConfigureAwait(true);
         }
         catch (Exception ex)
         {

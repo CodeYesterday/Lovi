@@ -4,8 +4,9 @@
       "name": "CLEF",
       "importerProfileId": "CLEF",
       "filter": "*.clef",
-      "importAllFiles": false,
+      "importAllFiles": true,
       "selectedFiles": [
+        "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\SmallSession\\log1.clef",
         "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\SmallSession\\log2.clef"
       ]
     }
@@ -14,9 +15,7 @@
   "endTime": null,
   "logLevelFilterSettings": {
     "": {
-      "properties": [
-        "Application"
-      ],
+      "properties": [],
       "layersSettings": {}
     }
   }

@@ -1,0 +1,29 @@
+<RadzenStack Orientation="Orientation.Vertical" Style="min-width: 300px;">
+    @if (!string.IsNullOrEmpty(Text)){
+        <div>@Text</div>
+    }
+
+    @foreach (var choice in Choices)
+    {
+        <RadzenCard Variant="Variant.Filled" class="w-100">
+            <RadzenStack Orientation="Orientation.Vertical" class="w-100">
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    @if (!string.IsNullOrEmpty(choice.Icon))
+                    {
+                        <RadzenIcon Icon="@choice.Icon" IconColor="@choice.IconColor" IconStyle="@(choice.IconStyle)" />
+                    }
+                    <RadzenText Text="@choice.Title"/>
+                </RadzenStack>
+                
+                @if (!string.IsNullOrEmpty(choice.Description))
+                {
+                    <div>@choice.Description</div>
+                }
+                
+                <RadzenButton Text="@choice.ButtonText" ButtonStyle="@(choice.ButtonStyle ?? DialogOptions?.DefaultButtonStyle ?? ButtonStyle.Secondary)"
+                              Icon="@choice.ButtonIcon" IconColor="@choice.ButtonIconColor"
+                              Click="_ => OnCloseDialog(choice.Id)"/>
+            </RadzenStack>
+        </RadzenCard>
+    }
+</RadzenStack>
