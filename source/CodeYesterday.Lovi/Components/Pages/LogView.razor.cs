@@ -109,4 +109,43 @@ public partial class LogView
         Model.Session?.Refresh();
         return Task.CompletedTask;
     }
+
+    private static RenderFragment<LogPropertyModel> RenderPropertyColumn => property => builder =>
+    {
+        var (type, propertyPrefix) = property.PropertyTypes.Count == 1
+            ? property.PropertyTypes.FirstOrDefault() switch
+            {
+                PropertyType.String => (typeof(string), "s:"),
+                PropertyType.Float => (typeof(double?), "f:"),
+                PropertyType.Integer => (typeof(long?), "i:"),
+                PropertyType.Unsigned => (typeof(ulong?), "u:"),
+                /* For now only support string filtering for complex properties
+                PropertyType.List => (typeof(IReadOnlyList<LogEventPropertyValue>), "l:"),
+                PropertyType.Map => (typeof(IReadOnlyDictionary<ScalarValue, LogEventPropertyValue>), "m:"),
+                PropertyType.Object => (typeof(LogEventPropertyValue), "o:"), */
+                _ => (typeof(string), "")
+            } : (typeof(string), "");
+
+        builder.OpenComponent<RadzenDataGridColumn<LogItemModel>>(1);
+        builder.AddAttribute(2, "Title", property.Name);
+        builder.AddAttribute(3, "Type", type);
+        builder.AddAttribute(4, "Width", "100px");
+        builder.AddAttribute(5, "MinWidth", "40px");
+        builder.AddAttribute(6, "Property", PropertyAccess.GetDynamicPropertyExpression(propertyPrefix + property.Name, type));
+
+        builder.AddAttribute(7, "Template",
+            (RenderFragment<LogItemModel>)(item => builder2 =>
+            {
+                builder2.AddContent(8, item[property.Name]);
+            }));
+
+        builder.CloseComponent();
+
+        //<RadzenDataGridColumn Title="@property.Name" Type="@type" Width="100px" MinWidth="40px"
+        //                      Property="@PropertyAccess.GetDynamicPropertyExpression(propertyPrefix + property.Name, type)">
+        //    <Template Context="item">
+        //        @item[property.Name]
+        //    </Template>
+        //</RadzenDataGridColumn>
+    };
 }
