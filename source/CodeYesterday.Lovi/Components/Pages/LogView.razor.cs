@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 using Serilog.Events;
-using System.Diagnostics;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
 
 namespace CodeYesterday.Lovi.Components.Pages;
@@ -72,8 +71,7 @@ public partial class LogView
 
     private void OnPropertiesChanged(object? sender, EventArgs e)
     {
-        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-        _dataGrid?.Reload();
+        InvokeAsync(_dataGrid.Reload);
     }
 
     private async Task LoadData(LoadDataArgs args)
@@ -82,12 +80,12 @@ public partial class LogView
 
         try
         {
-            Debug.Print($"LoadData: orderBy={args.OrderBy}, skip={args.Skip}, top={args.Top}");
+            //Debug.Print($"LoadData: orderBy={args.OrderBy}, skip={args.Skip}, top={args.Top}");
             await Model.Session.LoadDataAsync(args);
         }
         catch (Exception ex)
         {
-            Debug.Print($"LoadDataException: {ex}");
+            //Debug.Print($"LoadDataException: {ex}");
             NotificationService.Notify(NotificationSeverity.Error, "Update Data Grid", ex.Message);
         }
 

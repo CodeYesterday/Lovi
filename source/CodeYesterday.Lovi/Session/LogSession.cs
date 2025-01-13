@@ -1,7 +1,6 @@
 ﻿using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
 using Radzen;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using FileInfo = System.IO.FileInfo;
@@ -146,19 +145,19 @@ internal class LogSession : IAsyncDisposable
         var filters = new List<string>();
         if (!string.IsNullOrEmpty(logLevelFilter))
         {
-            Debug.Print($"LogLevelFilter: {logLevelFilter}");
+            //Debug.Print($"LogLevelFilter: {logLevelFilter}");
             filters.Add(logLevelFilter);
         }
 
         if (!string.IsNullOrEmpty(AdvancedFilterExpression))
         {
-            Debug.Print($"AdvancedFilter: {AdvancedFilterExpression}");
+            //Debug.Print($"AdvancedFilter: {AdvancedFilterExpression}");
             filters.Add(AdvancedFilterExpression);
         }
 
         if (!string.IsNullOrEmpty(args.Filter))
         {
-            Debug.Print($"DataGridFilter: {args.Filter}");
+            //Debug.Print($"DataGridFilter: {args.Filter}");
             filters.Add(args.Filter);
         }
 
@@ -168,7 +167,7 @@ internal class LogSession : IAsyncDisposable
             1 => filters[0],
             _ => string.Join("and", filters.Select(f => $"({f})"))
         };
-        Debug.Print($"CombinedFilter: {filter}");
+        //Debug.Print($"CombinedFilter: {filter}");
 
         // Get the filtered items:
         var (data, count) = await DataStorage.GetDataAsync(args.Skip, args.Top,
@@ -363,6 +362,9 @@ internal class LogSession : IAsyncDisposable
     private async Task ImportDataAsync(ProgressModel progressModel, CancellationToken cancellationToken)
     {
         CheckInitialized();
+
+        // TODO: implement incremental load
+        await DataStorage.ClearDataAsync(cancellationToken);
 
         foreach (var importSource in SessionConfig.Sources)
         {

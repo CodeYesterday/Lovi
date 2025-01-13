@@ -38,7 +38,6 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
         ProgressModel progressModel, CancellationToken cancellationToken)
     {
         // TODO: implement incremental load.
-        _data.Clear();
 
         var file = ((ISessionDataStorage)this).GetLogFileByFilePath(filePath);
         if (file is null)

@@ -4,7 +4,7 @@
       "name": "CLEF",
       "importerProfileId": "CLEF",
       "filter": "*.clef",
-      "importAllFiles": true,
+      "importAllFiles": false,
       "selectedFiles": [
         "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\SmallSession\\log1.clef",
         "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\SmallSession\\log2.clef"

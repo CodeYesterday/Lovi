@@ -4,7 +4,6 @@ using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
-using System.Diagnostics;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
 
 namespace CodeYesterday.Lovi.Components.Layout;
@@ -155,7 +154,7 @@ public partial class PaneLayout : IPaneLayout
 
     private void OnPaneResize(RadzenSplitterResizeEventArgs args)
     {
-        Debug.Print($"New size = {args.NewSize}");
+        //Debug.Print($"New size = {args.NewSize}");
 
         if (ReferenceEquals(args.Pane, _leftPane) && LeftPane is not null)
         {
