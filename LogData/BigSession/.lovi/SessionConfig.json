@@ -4,17 +4,21 @@
       "name": "CLEF",
       "importerProfileId": "CLEF",
       "filter": "*.clef",
-      "importAllFiles": true,
+      "importAllFiles": false,
       "selectedFiles": [
         "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\BigSession\\log1.clef",
         "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\BigSession\\log2.clef",
         "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\BigSession\\log3.clef",
-        "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\BigSession\\log4.clef",
         "E:\\CodeYesterday\\Repos\\CodeYesterday.Lovi\\LogData\\BigSession\\log5.clef"
       ]
     }
   ],
   "startTime": null,
   "endTime": null,
-  "logLevelFilterSettings": {}
+  "logLevelFilterSettings": {
+    "": {
+      "properties": [],
+      "layersSettings": {}
+    }
+  }
 }

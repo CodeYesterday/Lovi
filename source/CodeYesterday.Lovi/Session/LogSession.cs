@@ -363,9 +363,6 @@ internal class LogSession : IAsyncDisposable
     {
         CheckInitialized();
 
-        // TODO: implement incremental load
-        await DataStorage.ClearDataAsync(cancellationToken);
-
         foreach (var importSource in SessionConfig.Sources)
         {
             if (importSource.ImportAllFiles)
@@ -387,15 +384,37 @@ internal class LogSession : IAsyncDisposable
         var files = SessionConfig.Sources
             .SelectMany(s => s.SelectedFiles.Select(f => new { source = s, file = new FileInfo(f) }))
             .OrderBy(i => i.file.LastWriteTimeUtc)
-            .ToArray();
+            .ToList();
 
-        if (!files.Any()) return;
+        if (!files.Any())
+        {
+            await DataStorage.ClearDataAsync(cancellationToken);
+            return;
+        }
 
         progressModel.MainProgress = new()
         {
             Max = files.Sum(i => i.file.Length),
             Value = 0
         };
+
+        // TODO: Support incremental import of files
+        // Remove data from removed or changed files
+        // Remove unchanged files from the files to import list.
+        foreach (var importedFile in DataStorage.LogFiles.Values.ToArray())
+        {
+            var selectedFile = files.FirstOrDefault(f =>
+                string.Equals(f.file.FullName, importedFile.FilePath, StringComparison.OrdinalIgnoreCase));
+
+            if (selectedFile is null || selectedFile.file.Length != importedFile.Size)
+            {
+                await DataStorage.UnloadFileAsync(importedFile.Id, cancellationToken).ConfigureAwait(false);
+            }
+            else if (selectedFile.file.Length == importedFile.Size)
+            {
+                files.Remove(selectedFile);
+            }
+        }
 
         foreach (var file in files)
         {

@@ -120,6 +120,7 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
 
     public Task UnloadFileAsync(int fileId, CancellationToken cancellationToken)
     {
+        // TODO: Log items of one file usually are right next to each other in the list: Search start/end of each block and use RemoveRange()
         for (int n = _data.Count - 1; n >= 0; --n)
         {
             if (_data[n].FileId == fileId)
