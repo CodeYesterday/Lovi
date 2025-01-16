@@ -78,24 +78,48 @@ public partial class SessionConfigView
         ImportSources.Remove(source);
     }
 
+    private async Task OnUnloadData()
+    {
+        if (Session is null) return;
+
+        try
+        {
+            await Session.UnloadDataAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Import failed", ex.Message, 20000d);
+        }
+    }
+
+    private async Task OnImportData()
+    {
+        if (Session is null) return;
+
+        try
+        {
+            await ImportDataAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            if (ex is OperationCanceledException)
+            {
+                NotificationService.Notify(NotificationSeverity.Info, "Import data", "Cancelled");
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Import failed", ex.Message, 20000d);
+            }
+        }
+    }
+
     private async Task OnOpenSession()
     {
         if (Session is null) return;
 
         try
         {
-            Session.SessionConfig.Sources.Clear();
-
-            foreach (var source in ImportSources)
-            {
-                Session.SessionConfig.Sources.Add(source.GetImportSource());
-            }
-
-            Session.SessionConfig.WriteLogLevelFilterPropertySettings(LogLevelFilterProperties);
-
-            await Session.SaveDataAsync(CancellationToken.None).ConfigureAwait(true);
-
-            await Session.ImportDataAsync(ProgressIndicator, CancellationToken.None).ConfigureAwait(true);
+            await ImportDataAsync(CancellationToken.None).ConfigureAwait(true);
 
             NavigationManager.NavigateTo("/log");
         }
@@ -110,6 +134,24 @@ public partial class SessionConfigView
                 NotificationService.Notify(NotificationSeverity.Error, "Import failed", ex.Message, 20000d);
             }
         }
+    }
+
+    private async Task ImportDataAsync(CancellationToken cancellationToken)
+    {
+        if (Session is null) return;
+
+        Session.SessionConfig.Sources.Clear();
+
+        foreach (var source in ImportSources)
+        {
+            Session.SessionConfig.Sources.Add(source.GetImportSource());
+        }
+
+        Session.SessionConfig.WriteLogLevelFilterPropertySettings(LogLevelFilterProperties);
+
+        await Session.SaveDataAsync(cancellationToken).ConfigureAwait(true);
+
+        await Session.ImportDataAsync(ProgressIndicator, cancellationToken).ConfigureAwait(true);
     }
 
     private void AddSource()

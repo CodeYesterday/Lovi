@@ -130,8 +130,23 @@ else
             </RadzenFormField>
 
             @* Buttons *@
-            <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Open session"
-                          Click="OnOpenSession" />
+            <RadzenRow>
+                <RadzenColumn Size="4">
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Unload data" Icon="delete"
+                                  class="w-100"
+                                  Click="OnUnloadData"/>
+                </RadzenColumn>
+                <RadzenColumn Size="4">
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Import data" Icon="refresh"
+                                  class="w-100"
+                                  Click="OnImportData"/>
+                </RadzenColumn>
+                <RadzenColumn Size="4">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Import and open session" Icon="folder_open"
+                                  class="w-100"
+                                  Click="OnOpenSession" />
+                </RadzenColumn>
+            </RadzenRow>
         </RadzenStack>
     </div>
 }
