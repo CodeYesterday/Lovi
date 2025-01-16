@@ -1,4 +1,5 @@
 @page "/session_config"
+
 @using CodeYesterday.Lovi.Models
 
 @if (Session?.DataStorage is null)
@@ -115,7 +116,7 @@ else
                                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
                                         @property
                                         <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
-                                                      Click="_ => OnRemoveLogLevelFilterProperty(property)"/>
+                                                      Click="_ => OnRemoveLogLevelFilterProperty(property)" />
                                     </RadzenStack>
                                 </RadzenBadge>
                             </RadzenBreadCrumbItem>
@@ -134,12 +135,12 @@ else
                 <RadzenColumn Size="4">
                     <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Unload data" Icon="delete"
                                   class="w-100"
-                                  Click="OnUnloadData"/>
+                                  Click="OnUnloadData" />
                 </RadzenColumn>
                 <RadzenColumn Size="4">
                     <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Import data" Icon="refresh"
                                   class="w-100"
-                                  Click="OnImportData"/>
+                                  Click="OnImportData" />
                 </RadzenColumn>
                 <RadzenColumn Size="4">
                     <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Import and open session" Icon="folder_open"
@@ -150,11 +151,3 @@ else
         </RadzenStack>
     </div>
 }
-
-
-<style>
-    @* Extend the form field style *@
-    .rz-form-field-content {
-        height: 100%;
-    }
-</style>
