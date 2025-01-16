@@ -54,26 +54,45 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
 
         file.Size = new FileInfo(filePath).Length;
 
-        var propertiesChanged = false;
-        await foreach (var evt in importer.ImportLogsAsync(filePath,
-                           progress =>
-                           {
-                               var diff = progress.Value - progressModel.SecondaryProgress?.Value ?? 0;
-                               progressModel.SecondaryProgress = progress;
-                               progressModel.MainProgress = progressModel.MainProgress with
-                               {
-                                   Value = progressModel.MainProgress.Value + diff
-                               };
-                           },
-                           cancellationToken).ConfigureAwait(false))
+        progressModel.SecondaryProgress = new()
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            Max = file.Size,
+            Value = 0
+        };
 
-            if ((startTime is null || evt.Timestamp >= startTime)
-                || (endTime is null || evt.Timestamp <= endTime))
+        var propertiesChanged = false;
+        try
+        {
+            double initialMainProgressValue = progressModel.MainProgress.Value;
+
+            await foreach (var (evt, filePosition) in importer.ImportLogsAsync(filePath,
+                               cancellationToken).ConfigureAwait(false))
             {
-                propertiesChanged |= AddInternal(evt, file.Id);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ((startTime is null || evt.Timestamp >= startTime)
+                    || (endTime is null || evt.Timestamp <= endTime))
+                {
+                    propertiesChanged |= AddInternal(evt, file.Id);
+                }
+
+                progressModel.SecondaryProgress = new()
+                {
+                    Max = file.Size,
+                    Value = filePosition
+                };
+                progressModel.MainProgress = progressModel.MainProgress with
+                {
+                    Value = initialMainProgressValue + filePosition
+                };
+
+                file.IncrementalImportStartPosition = filePosition;
             }
+        }
+        catch (OperationCanceledException)
+        {
+            file.ImportCancelled = true;
+            throw;
         }
 
         if (propertiesChanged)
@@ -154,6 +173,7 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
 
         _data.Clear();
         _properties.Clear();
+        LogFiles.Clear();
 
         OnPropertiesChanged();
 

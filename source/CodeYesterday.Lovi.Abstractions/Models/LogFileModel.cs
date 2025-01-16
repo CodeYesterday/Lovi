@@ -8,5 +8,7 @@ public class LogFileModel
 
     public long Size { get; set; }
 
+    public bool ImportCancelled { get; set; }
+
     public long IncrementalImportStartPosition { get; set; }
 }

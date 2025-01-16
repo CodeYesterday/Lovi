@@ -406,11 +406,11 @@ internal class LogSession : IAsyncDisposable
             var selectedFile = files.FirstOrDefault(f =>
                 string.Equals(f.file.FullName, importedFile.FilePath, StringComparison.OrdinalIgnoreCase));
 
-            if (selectedFile is null || selectedFile.file.Length != importedFile.Size)
+            if (selectedFile is null || selectedFile.file.Length != importedFile.Size || importedFile.ImportCancelled)
             {
                 await DataStorage.UnloadFileAsync(importedFile.Id, cancellationToken).ConfigureAwait(false);
             }
-            else if (selectedFile.file.Length == importedFile.Size)
+            else if (selectedFile.file.Length == importedFile.Size && !importedFile.ImportCancelled)
             {
                 files.Remove(selectedFile);
             }
