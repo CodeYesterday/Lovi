@@ -1,10 +1,10 @@
-﻿using CodeYesterday.Lovi.Input;
-using CodeYesterday.Lovi.Models;
+﻿using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 using Serilog.Events;
+using System.Diagnostics;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
 
 namespace CodeYesterday.Lovi.Components.Pages;
@@ -15,9 +15,6 @@ public partial class LogView
     private readonly StatusBarTextItem _statusBarItem = new() { Id = "LogView.Count", OrderIndex = -1 };
 
     private RadzenDataGrid<LogItemModel> _dataGrid = default!;
-
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
 
     [Inject]
     private NotificationService NotificationService { get; set; } = default!;
@@ -34,11 +31,28 @@ public partial class LogView
     [CascadingParameter]
     public IPaneLayout? PaneLayout { get; set; }
 
-    [CascadingParameter]
-    public ToolbarContainer? ToolbarContainer { get; set; }
+    public override Task OnOpeningAsync(CancellationToken cancellationToken)
+    {
+        Debug.Assert(Model.Session is not null, "Log view is opening without session");
+        if (Model.Session is not null)
+        {
+            Model.Session.PropertiesChanged += OnPropertiesChanged;
+            Model.Session.Refreshing += OnRefreshing;
+        }
 
-    [CascadingParameter]
-    public StatusBarModel? StatusBarModel { get; set; }
+        return base.OnOpeningAsync(cancellationToken);
+    }
+
+    public override Task OnClosingAsync(CancellationToken cancellationToken)
+    {
+        if (Model.Session is not null)
+        {
+            Model.Session.PropertiesChanged -= OnPropertiesChanged;
+            Model.Session.Refreshing -= OnRefreshing;
+        }
+
+        return base.OnClosingAsync(cancellationToken);
+    }
 
     private IList<LogItemModel>? SelectedItems
     {
@@ -48,14 +62,6 @@ public partial class LogView
             if (Model.Session is null) return;
             Model.Session.SelectedLogItem = value?.FirstOrDefault();
         }
-    }
-
-    protected override void OnParametersSet()
-    {
-        if (Model.Session is null) return;
-
-        Model.Session.PropertiesChanged += OnPropertiesChanged;
-        Model.Session.Refreshing += OnRefreshing;
     }
 
     private void OnRefreshing(object? sender, EventArgs e)
@@ -100,8 +106,7 @@ public partial class LogView
 
     private Task OnEditSession(object? _)
     {
-        NavigationManager.NavigateTo("/session_config");
-        return Task.CompletedTask;
+        return ViewManager.ShowViewAsync(ViewId.SessionConfig, CancellationToken.None);
     }
 
     private Task OnRefreshExecute(object? _)

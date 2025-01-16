@@ -32,6 +32,8 @@ namespace CodeYesterday.Lovi
 
             builder.Services.AddTransient(typeof(IUserSettingsService<>), typeof(MauiUserSettingsService<>));
             builder.Services.AddTransient<IMruService, MruService>();
+            builder.Services.AddSingleton<IViewManagerInternal, ViewManager>();
+            builder.Services.AddSingleton<IViewManager>(x => x.GetService<IViewManagerInternal>()!);
             builder.Services.AddSingleton<IImporterManager, ImporterManager>();
             builder.Services.AddSingleton<ISettingsService, SettingsService>();
             builder.Services.AddSingleton<IProgressIndicator, ProgressIndicator>();

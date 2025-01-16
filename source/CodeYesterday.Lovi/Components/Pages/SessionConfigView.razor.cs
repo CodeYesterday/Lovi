@@ -18,9 +18,6 @@ public partial class SessionConfigView
     private IProgressIndicator ProgressIndicator { get; set; } = default!;
 
     [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
-
-    [Inject]
     private IImporterManager ImporterManager { get; set; } = default!;
 
     [Inject]
@@ -34,11 +31,11 @@ public partial class SessionConfigView
 
     private string LogLevelPropertyInput { get; set; } = string.Empty;
 
-    protected override void OnInitialized()
+    public override Task OnOpeningAsync(CancellationToken cancellationToken)
     {
         base.OnInitialized();
 
-        if (Session is null) return;
+        if (Session is null) return base.OnOpeningAsync(cancellationToken);
 
         foreach (var source in Session.SessionConfig.Sources)
         {
@@ -48,6 +45,8 @@ public partial class SessionConfigView
         }
 
         LogLevelFilterProperties = Session.SessionConfig.GetLogLevelFilterPropertySettings();
+
+        return base.OnOpeningAsync(cancellationToken);
     }
 
     private void RefreshSource(ImportSourceViewModel source, IList<string>? selectedFiles = null)
@@ -121,7 +120,7 @@ public partial class SessionConfigView
         {
             await ImportDataAsync(CancellationToken.None).ConfigureAwait(true);
 
-            NavigationManager.NavigateTo("/log");
+            await ViewManager.ShowViewAsync(ViewId.LogView, CancellationToken.None).ConfigureAwait(true);
         }
         catch (Exception ex)
         {

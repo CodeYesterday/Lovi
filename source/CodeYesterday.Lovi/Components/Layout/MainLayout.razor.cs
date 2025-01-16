@@ -1,5 +1,6 @@
 ﻿using CodeYesterday.Lovi.Input;
 using CodeYesterday.Lovi.Models;
+using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
 using System.Windows.Input;
 using ToolbarItem = CodeYesterday.Lovi.Input.ToolbarItem;
@@ -10,6 +11,9 @@ public partial class MainLayout
 {
     private readonly List<ToolbarItem> _hookedItems = new();
     private readonly List<ICommand> _hookedCommands = new();
+
+    [Inject]
+    private IViewManagerInternal ViewManagerInternal { get; set; } = default!;
 
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
@@ -23,6 +27,8 @@ public partial class MainLayout
 
     protected override void OnInitialized()
     {
+        ViewManagerInternal.SetNavigationManager(NavigationManager);
+
         NavigationManager.RegisterLocationChangingHandler(_ =>
         {
             foreach (var toolbar in ToolbarContainer.Toolbars.ToArray())
@@ -115,7 +121,7 @@ public partial class MainLayout
             Model.Session = null;
         }
 
-        NavigationManager.NavigateTo("/");
+        await ViewManagerInternal.ShowViewAsync(ViewId.StartView, CancellationToken.None).ConfigureAwait(true);
     }
 
     private Task OnShowSettings(object? parameter)

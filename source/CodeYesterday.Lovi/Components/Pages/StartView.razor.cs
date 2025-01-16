@@ -23,9 +23,6 @@ public partial class StartView
     private IImporterManager ImporterManager { get; set; } = default!;
 
     [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
-
-    [Inject]
     private IMruService MruService { get; set; } = default!;
 
     [Inject]
@@ -133,7 +130,7 @@ public partial class StartView
 
         Model.Session = session;
 
-        NavigationManager.NavigateTo("/session_config");
+        await ViewManager.ShowViewAsync(ViewId.SessionConfig, CancellationToken.None).ConfigureAwait(true);
     }
 
     private async Task OnOpenSession(bool openConfigView)
@@ -218,24 +215,24 @@ public partial class StartView
 
             MruService.SetMruSessionDirectory(session.SessionDirectory);
 
-            string uri;
+            ViewId viewId;
 
             if (openConfigView)
             {
                 Model.Session = session;
 
-                uri = "/session_config";
+                viewId = ViewId.SessionConfig;
             }
             else
             {
                 await session.ImportDataAsync(ProgressIndicator, CancellationToken.None).ConfigureAwait(true);
 
-                uri = "/log";
+                viewId = ViewId.LogView;
             }
 
             Model.Session = session;
 
-            NavigationManager.NavigateTo(uri);
+            await ViewManager.ShowViewAsync(viewId, CancellationToken.None).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
