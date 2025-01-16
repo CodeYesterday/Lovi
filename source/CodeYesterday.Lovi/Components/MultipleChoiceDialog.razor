@@ -5,14 +5,14 @@
 
     @foreach (var choice in Choices)
     {
-        <RadzenCard Variant="Variant.Filled" class="w-100">
-            <RadzenStack Orientation="Orientation.Vertical" class="w-100">
-                <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenCard Variant="Variant.Flat" class="w-100">
+            <RadzenStack Orientation="Orientation.Vertical" class="w-100" Gap="0.5em">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="1em">
                     @if (!string.IsNullOrEmpty(choice.Icon))
                     {
                         <RadzenIcon Icon="@choice.Icon" IconColor="@choice.IconColor" IconStyle="@(choice.IconStyle)" />
                     }
-                    <RadzenText Text="@choice.Title"/>
+                    <RadzenText Text="@choice.Title" TextStyle="TextStyle.H6"/>
                 </RadzenStack>
                 
                 @if (!string.IsNullOrEmpty(choice.Description))
