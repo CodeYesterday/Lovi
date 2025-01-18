@@ -1,0 +1,121 @@
+<RadzenStack Orientation="Orientation.Vertical" class="w-100 h-100" Gap="0.5em">
+    <RadzenRow>
+        <RadzenColumn Size="9">
+            <RadzenText TextStyle="TextStyle.DisplayH6" Text="LoVi Logging Viewer"/>
+
+            <RadzenText TextStyle="TextStyle.Subtitle1" Text="by CodeYesterday"/>
+
+            <RadzenText TextStyle="TextStyle.Body1" Text="@($"Version {Version}")"/>
+
+            <RadzenText TextStyle="TextStyle.Subtitle1" Text="3rd party licenses:"/>
+        </RadzenColumn>
+        
+        <RadzenColumn Size="3">
+            <RadzenImage Path="logo.svg" class="w-100" />
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenStack Orientation="Orientation.Vertical" class="w-100 rz-p-1 flex-fill rz-overflow-auto">
+        @foreach (var license in Licenses)
+        {
+            <RadzenCard Variant="Variant.Flat" class="w-100 rz-p-2">
+                <RadzenRow class="license-prop-row">
+                    <RadzenColumn Size="3">
+                        <RadzenLabel Text="Package name" class="license-prop-name"/>
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <RadzenLabel Text="@license.PackageName"/>
+
+                    </RadzenColumn>
+                    <RadzenColumn Size="1">
+                        @if (!string.IsNullOrEmpty(license.PackageUrl))
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                          Icon="open_in_new" class="rz-ml-auto"
+                                          Click="_ => OpenUrl(license.PackageUrl)"
+                                          MouseEnter="@(e => ShowTooltip(e, $"Go to project:<br/>{license.PackageUrl}"))"/>
+                        }
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow class="license-prop-row">
+                    <RadzenColumn Size="3">
+                        <RadzenLabel Text="Version" class="license-prop-name"/>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenLabel Text="@license.PackageVersion"/>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                @if (!string.IsNullOrEmpty(license.Copyright))
+                {
+                    <RadzenRow class="license-prop-row">
+                        <RadzenColumn Size="3">
+                            <RadzenLabel Text="Copyright" class="license-prop-name"/>
+                        </RadzenColumn>
+                        <RadzenColumn Size="9">
+                            <RadzenLabel Text="@license.Copyright"/>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+
+                @if (!string.IsNullOrEmpty(license.LicenseType) || !string.IsNullOrEmpty(license.LicenseUrl))
+                {
+                    <RadzenRow class="license-prop-row">
+                        <RadzenColumn Size="3">
+                            <RadzenLabel Text="License" class="license-prop-name"/>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenLabel Text="@license.LicenseType"/>
+                        </RadzenColumn>
+                        <RadzenColumn Size="1">
+                            @if (!string.IsNullOrEmpty(license.LicenseUrl))
+                            {
+                                <RadzenButton ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                              Icon="open_in_new" class="rz-ml-auto"
+                                              Click="_ => OpenUrl(license.LicenseUrl)"
+                                              MouseEnter="@(e => ShowTooltip(e, $"Go to license:<br/>{license.LicenseUrl}"))"/>
+                            }
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+
+                @if (license.Authors.Any())
+                {
+                    <RadzenRow class="license-prop-row">
+                        <RadzenColumn Size="3">
+                            <RadzenLabel Text="Authors" class="license-prop-name"/>
+                        </RadzenColumn>
+                        <RadzenColumn Size="9">
+                            <RadzenLabel Text="@string.Join(", ", license.Authors)"/>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+
+                @if (!string.IsNullOrEmpty(license.Description))
+                {
+                    <RadzenRow class="license-prop-row">
+                        <RadzenColumn Size="12">
+                            <RadzenLabel Text="@license.Description"/>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </RadzenCard>
+        }
+    </RadzenStack>
+
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Text="Close" Icon="close"
+                  class="rz-ml-auto"
+                  Click="_ => DialogService.Close()" />
+</RadzenStack>
+
+<style>
+    .license-prop-name {
+        font-weight: bold;
+    }
+
+    .licnse-prop-row {
+        width: 100%;
+        min-height: 1.5em;
+    }
+</style>

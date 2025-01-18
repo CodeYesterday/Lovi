@@ -2,6 +2,7 @@
 using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 using System.Windows.Input;
 using ToolbarItem = CodeYesterday.Lovi.Input.ToolbarItem;
 
@@ -11,6 +12,9 @@ public partial class MainLayout
 {
     private readonly List<ToolbarItem> _hookedItems = new();
     private readonly List<ICommand> _hookedCommands = new();
+
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
 
     [Inject]
     private IViewManagerInternal ViewManagerInternal { get; set; } = default!;
@@ -115,7 +119,7 @@ public partial class MainLayout
 
     private Task OnShowAbout(object? parameter)
     {
-        return Task.CompletedTask;
+        return AboutDialog.ShowAsync(DialogService);
     }
 
     private void OnToolbarsChanged(object? sender, EventArgs e)
