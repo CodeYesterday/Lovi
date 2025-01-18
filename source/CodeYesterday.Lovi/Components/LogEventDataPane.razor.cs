@@ -61,7 +61,7 @@ public partial class LogEventDataPane
             var logLevelSettings = SettingsService.GetSettings().GetLogLevelSettings(logItem.LogEvent.Level);
             // TODO: The icon does not render like this. Probably have to switch to RenderFragment instead of markup string.
             Data.Add(new() { PropertyName = "Level", ValueMarkup = $"<RadzenIcon Icon=\"{logLevelSettings.Icon}\" IconColor=\"{logLevelSettings.Color}\"/> {logItem.LogEvent.Level}" });
-            Data.Add(new() { PropertyName = "Timestamp", ValueMarkup = logItem.LogEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff") });
+            Data.Add(new() { PropertyName = "Timestamp", ValueMarkup = logItem.LogEvent.Timestamp.ToString(SettingsService.GetSettings().TimestampFormat) });
             Data.Add(new() { PropertyName = "Message", ValueMarkup = LogEventHtmlRenderer.Render(logItem.LogEvent.MessageTemplate, logItem.LogEvent.Properties, false) });
             Data.Add(new() { PropertyName = "Message template", ValueMarkup = logItem.LogEvent.MessageTemplate.Text });
             Data.Add(new() { PropertyName = "Exception", ValueMarkup = logItem.LogEvent.Exception?.ToString() ?? string.Empty });

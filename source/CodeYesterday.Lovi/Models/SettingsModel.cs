@@ -49,6 +49,16 @@ public class SettingsModel
     };
 
     /// <summary>
+    /// Gets or set the timestamp format.
+    /// </summary>
+    public string TimestampFormat { get; set; } = "yyyy-MM-dd HH:mm:ss.fff";
+
+    /// <summary>
+    /// Gets the timestamp format string.
+    /// </summary>
+    public string TimestampFormatString => $"{{0:{TimestampFormat}}}";
+
+    /// <summary>
     /// Creates a new instance of the settings model with default values.
     /// </summary>
     public SettingsModel()

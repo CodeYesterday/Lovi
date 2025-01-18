@@ -15,7 +15,8 @@ else
                 <RadzenDataFilterProperty Title="Level" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)}")">
                 </RadzenDataFilterProperty>
 
-                <RadzenDataFilterProperty Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")" FormatString="{0:yyyy-MM-dd HH:mm:ss.fff}"/>
+                <RadzenDataFilterProperty Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")"
+                                          FormatString="@SettingsService.GetSettings().TimestampFormatString"/>
 
                 <RadzenDataFilterProperty Title="Message" Property="@($"{nameof(LogItemModel.RenderedMessage)}")" />
 

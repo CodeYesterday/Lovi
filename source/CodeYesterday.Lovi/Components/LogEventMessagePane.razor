@@ -14,7 +14,7 @@ else
                 <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="4px">
                     <RadzenIcon Icon="@logItemSettings.Icon" IconColor="@logItemSettings.Color" />
 
-                    <RadzenText Text="@(SelectedItem.LogEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"))"/>
+                    <RadzenText Text="@(SelectedItem.LogEvent.Timestamp.ToString(SettingsService.GetSettings().TimestampFormat))"/>
 
                     <RadzenButton Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-ml-auto"
                                   Icon="content_copy"

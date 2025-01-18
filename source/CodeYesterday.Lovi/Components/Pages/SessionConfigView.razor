@@ -132,6 +132,27 @@ else
                 </RadzenStack>
             </RadzenFormField>
 
+            @* Info *@
+            <RadzenFormField Text="Information" AllowFloatingLabel="false" class="w-100">
+                <RadzenStack Orientation="Orientation.Horizontal" class="rz-px-2 rz-pt-2">
+                    @if (Stats.LogItemCount == 0)
+                    {
+                        <RadzenText Text="No log event imported" />
+                    }
+                    else
+                    {
+                        <RadzenLabel Text="Log event count:" />
+                        <RadzenText Text="@Stats.LogItemCount.ToString()" />
+
+                        <RadzenLabel Text="First timestamp:" />
+                        <RadzenText Text="@Stats.FirstItemTimestamp.ToString(SettingsService.GetSettings().TimestampFormat)" />
+
+                        <RadzenLabel Text="Last timestamp:" />
+                        <RadzenText Text="@Stats.LastItemTimestamp.ToString(SettingsService.GetSettings().TimestampFormat)" />
+                    }
+                </RadzenStack>
+            </RadzenFormField>
+
             @* Buttons *@
             <RadzenRow>
                 <RadzenColumn Size="4">
@@ -153,3 +174,10 @@ else
         </RadzenStack>
     </div>
 }
+
+<style>
+    @* Extend the form field style *@
+    .rz-form-field-content {
+        height: 100%;
+    }
+</style>

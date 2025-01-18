@@ -33,6 +33,28 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
         return Task.CompletedTask;
     }
 
+    public Task<LogDataStats> GetStatsAsync(CancellationToken cancellationToken)
+    {
+        if (_data.Count == 0)
+        {
+            return Task.FromResult(LogDataStats.Empty);
+        }
+
+        return Task.FromResult(_data.Aggregate(
+            new LogDataStats
+            {
+                LogItemCount = _data.Count,
+                FirstItemTimestamp = DateTimeOffset.MaxValue,
+                LastItemTimestamp = DateTimeOffset.MinValue
+            },
+            (a, x) =>
+                a with
+                {
+                    FirstItemTimestamp = x.LogEvent.Timestamp < a.FirstItemTimestamp ? x.LogEvent.Timestamp : a.FirstItemTimestamp,
+                    LastItemTimestamp = x.LogEvent.Timestamp > a.LastItemTimestamp ? x.LogEvent.Timestamp : a.LastItemTimestamp,
+                }));
+    }
+
     public async Task ImportDataAsync(IImporter importer, string filePath,
         long startFilePosition, DateTimeOffset? startTime, DateTimeOffset? endTime,
         ProgressModel progressModel, CancellationToken cancellationToken)

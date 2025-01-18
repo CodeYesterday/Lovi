@@ -18,18 +18,18 @@ else
     <RadzenStack Orientation="Orientation.Vertical" class="h-100" Gap="0">
         @* Logs data grid *@
         <RadzenDataGrid @ref="_dataGrid" Class="flex-fill w-100"
-        TItem="LogItemModel" Data="@Model.Session.PagedItems" Count="@Model.Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
-        AllowColumnReorder="true" AllowColumnResize="true"
-        AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"
-        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
-        AllowSorting="true" AllowMultiColumnSorting="true"
-        AllowColumnPicking="true" Density="Density.Compact"
-        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems">
+                        TItem="LogItemModel" Data="@Model.Session.PagedItems" Count="@Model.Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
+                        AllowColumnReorder="true" AllowColumnResize="true"
+                        AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
+                        AllowSorting="true" AllowMultiColumnSorting="true"
+                        AllowColumnPicking="true" Density="Density.Compact"
+                        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems">
 
             <Columns>
                 <RadzenDataGridColumn Title="Level" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)}")"
-                Width="50px" MinWidth="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
-                Sortable="true" Filterable="false">
+                                      Width="50px" MinWidth="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                                      Sortable="true" Filterable="false">
                     <Template Context="item">
                         @{
                             var (icon, color) = GetLogEventIcon(item.LogEvent);
@@ -38,11 +38,12 @@ else
                     </Template>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")" FormatString="{0:yyyy-MM-dd HH:mm:ss.fff}"
-                TextAlign="TextAlign.Right"
-                Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
-                Sortable="true" Filterable="true"
-                SortOrder="SortOrder.Ascending" />
+                <RadzenDataGridColumn Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")"
+                                      FormatString="@SettingsService.GetSettings().TimestampFormatString"
+                                      TextAlign="TextAlign.Right"
+                                      Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                                      Sortable="true" Filterable="true"
+                                      SortOrder="SortOrder.Ascending" />
 
                 @* Pull columns in LogLevelFilter forward *@
                 @if (Model.Session is not null && !Model.Session.IsImporting)
@@ -57,20 +58,20 @@ else
                 }
 
                 <RadzenDataGridColumn Title="Message" Width="500px" MinWidth="40px"
-                Property="@nameof(LogItemModel.RenderedMessage)"
-                Sortable="true" Filterable="true" Type="@typeof(string)">
+                                      Property="@nameof(LogItemModel.RenderedMessage)"
+                                      Sortable="true" Filterable="true" Type="@typeof(string)">
                     <Template Context="evt">
                         @LogEventHtmlRenderer.RenderedLogMessage(evt)
                     </Template>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Title="Message template" Width="100px" MinWidth="40px" Visible="false"
-                Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.MessageTemplate)}")"
-                Sortable="true" />
+                                      Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.MessageTemplate)}")"
+                                      Sortable="true" />
 
                 <RadzenDataGridColumn Title="Exception" Width="100px" MinWidth="40px"
-                Property="@($"{nameof(LogItemModel.ExceptionText)}")"
-                Sortable="true" Filterable="true" />
+                                      Property="@($"{nameof(LogItemModel.ExceptionText)}")"
+                                      Sortable="true" Filterable="true" />
 
                 @* Property columns *@
                 @if (Model.Session is not null && !Model.Session.IsImporting)
@@ -93,20 +94,20 @@ else
         paneLayout.PaneUserSettings = UserSettings;
 
         paneLayout.LeftPane = new()
-        {
-            Content = @<LogLevelFilterPane CssClass="w-100 h-100" />
-        };
+                {
+                    Content = @<LogLevelFilterPane CssClass="w-100 h-100" />
+            };
         paneLayout.RightPane = new()
-        {
-            Content = @<LogEventDataPane CssClass="w-100 h-100" />
-        };
+                {
+                    Content = @<LogEventDataPane CssClass="w-100 h-100" />
+            };
         paneLayout.TopPane = new()
-        {
-            Content = @<AdvancedFilterPane CssClass="w-100 h-100" />
-        };
+                {
+                    Content = @<AdvancedFilterPane CssClass="w-100 h-100" />
+            };
         paneLayout.BottomPane = new()
-        {
-            Content = @<LogEventMessagePane CssClass="w-100 h-100" />
+                {
+                    Content = @<LogEventMessagePane CssClass="w-100 h-100" />
         };
 
         return Task.CompletedTask;

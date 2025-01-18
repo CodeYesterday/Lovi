@@ -46,6 +46,13 @@ public interface ISessionDataStorage
     Task OpenAsync(string sessionDirectory, string dataDirectory, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Returns information for the log data.
+    /// </summary>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>Returns the information data.</returns>
+    Task<LogDataStats> GetStatsAsync(CancellationToken cancellationToken);
+
+    /// <summary>
     /// Imports the log events from a file.
     /// </summary>
     /// <param name="importer">The importer to import the file.</param>
@@ -72,8 +79,6 @@ public interface ISessionDataStorage
     /// <param name="fileId">The ID of the file.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to cancel the operation.</param>
     Task UnloadFileAsync(int fileId, CancellationToken cancellationToken);
-
-    //Task AddLogEventAsync(LogEvent evt, CancellationToken cancellationToken);
 
     /// <summary>
     /// Clears all data from the storage.

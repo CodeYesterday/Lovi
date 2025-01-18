@@ -21,6 +21,9 @@ public partial class SessionConfigView
     private IImporterManager ImporterManager { get; set; } = default!;
 
     [Inject]
+    private ISettingsService SettingsService { get; set; } = default!;
+
+    [Inject]
     private AppModel Model { get; set; } = default!;
 
     private LogSession? Session => Model.Session;
@@ -31,11 +34,11 @@ public partial class SessionConfigView
 
     private string LogLevelPropertyInput { get; set; } = string.Empty;
 
-    public override Task OnOpeningAsync(CancellationToken cancellationToken)
-    {
-        base.OnInitialized();
+    private LogDataStats Stats { get; set; } = LogDataStats.Empty;
 
-        if (Session is null) return base.OnOpeningAsync(cancellationToken);
+    public override async Task OnOpeningAsync(CancellationToken cancellationToken)
+    {
+        if (Session?.DataStorage is null) return;
 
         foreach (var source in Session.SessionConfig.Sources)
         {
@@ -46,7 +49,9 @@ public partial class SessionConfigView
 
         LogLevelFilterProperties = Session.SessionConfig.GetLogLevelFilterPropertySettings();
 
-        return base.OnOpeningAsync(cancellationToken);
+        Stats = await Session.DataStorage.GetStatsAsync(cancellationToken).ConfigureAwait(true);
+
+        await base.OnOpeningAsync(cancellationToken);
     }
 
     private void RefreshSource(ImportSourceViewModel source, IList<string>? selectedFiles = null)
@@ -79,7 +84,7 @@ public partial class SessionConfigView
 
     private async Task OnUnloadData()
     {
-        if (Session is null) return;
+        if (Session?.DataStorage is null) return;
 
         try
         {
@@ -89,11 +94,15 @@ public partial class SessionConfigView
         {
             NotificationService.Notify(NotificationSeverity.Error, "Import failed", ex.Message, 20000d);
         }
+        finally
+        {
+            Stats = await Session.DataStorage.GetStatsAsync(CancellationToken.None).ConfigureAwait(true);
+        }
     }
 
     private async Task OnImportData()
     {
-        if (Session is null) return;
+        if (Session?.DataStorage is null) return;
 
         try
         {
@@ -110,11 +119,15 @@ public partial class SessionConfigView
                 NotificationService.Notify(NotificationSeverity.Error, "Import failed", ex.Message, 20000d);
             }
         }
+        finally
+        {
+            Stats = await Session.DataStorage.GetStatsAsync(CancellationToken.None).ConfigureAwait(true);
+        }
     }
 
     private async Task OnOpenSession()
     {
-        if (Session is null) return;
+        if (Session?.DataStorage is null) return;
 
         try
         {
@@ -132,6 +145,8 @@ public partial class SessionConfigView
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Import failed", ex.Message, 20000d);
             }
+
+            Stats = await Session.DataStorage.GetStatsAsync(CancellationToken.None).ConfigureAwait(true);
         }
     }
 
