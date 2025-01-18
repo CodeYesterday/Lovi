@@ -29,27 +29,6 @@ public partial class MainLayout
     {
         ViewManagerInternal.SetNavigationManager(NavigationManager);
 
-        NavigationManager.RegisterLocationChangingHandler(_ =>
-        {
-            foreach (var toolbar in ToolbarContainer.Toolbars.ToArray())
-            {
-                if (!toolbar.Id.StartsWith("~"))
-                {
-                    ToolbarContainer.RemoveToolbar(toolbar.Id);
-                }
-            }
-
-            foreach (var item in StatusBar.Items.ToArray())
-            {
-                if (!item.Id.StartsWith("~"))
-                {
-                    StatusBar.RemoveItem(item.Id);
-                }
-            }
-
-            return ValueTask.CompletedTask;
-        });
-
         // Main toolbar
         ToolbarContainer.AddOrUpdateToolbar(new()
         {

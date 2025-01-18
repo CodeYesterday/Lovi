@@ -1,4 +1,5 @@
-﻿using CodeYesterday.Lovi.Models;
+﻿using CodeYesterday.Lovi.Input;
+using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -11,7 +12,6 @@ namespace CodeYesterday.Lovi.Components.Pages;
 
 public partial class LogView
 {
-    private Toolbar? _toolbar;
     private readonly StatusBarTextItem _statusBarItem = new() { Id = "LogView.Count", OrderIndex = -1 };
 
     private RadzenDataGrid<LogItemModel> _dataGrid = default!;
@@ -28,9 +28,6 @@ public partial class LogView
     [Inject]
     private IUserSettingsService<LogView> UserSettings { get; set; } = default!;
 
-    [CascadingParameter]
-    public IPaneLayout? PaneLayout { get; set; }
-
     public override Task OnOpeningAsync(CancellationToken cancellationToken)
     {
         Debug.Assert(Model.Session is not null, "Log view is opening without session");
@@ -41,6 +38,41 @@ public partial class LogView
         }
 
         return base.OnOpeningAsync(cancellationToken);
+    }
+
+    public override Task<IEnumerable<Toolbar>> OnCreateToolbarsAsync(CancellationToken cancellationToken)
+    {
+        return Task.FromResult((IEnumerable<Toolbar>)
+        [
+            new Toolbar
+            {
+                Id = "LogView",
+                OrderIndex = 0,
+                Items =
+                [
+                    new ToolbarButton
+                    {
+                        Icon = "edit",
+                        Tooltip = "Edit session",
+                        Command = new AsyncCommand(OnEditSession)
+                    },
+                    new ToolbarButton
+                    {
+                        Icon = "refresh",
+                        Tooltip = "Refresh",
+                        Command = new AsyncCommand(OnRefreshExecute)
+                    }
+                ]
+            }
+        ]);
+    }
+
+    public override Task<IEnumerable<StatusBarItem>> OnCreateStatusBarItemsAsync(CancellationToken cancellationToken)
+    {
+        return Task.FromResult((IEnumerable<StatusBarItem>)
+        [
+            _statusBarItem
+        ]);
     }
 
     public override Task OnClosingAsync(CancellationToken cancellationToken)
@@ -86,12 +118,10 @@ public partial class LogView
 
         try
         {
-            //Debug.Print($"LoadData: orderBy={args.OrderBy}, skip={args.Skip}, top={args.Top}");
             await Model.Session.LoadDataAsync(args);
         }
         catch (Exception ex)
         {
-            //Debug.Print($"LoadDataException: {ex}");
             NotificationService.Notify(NotificationSeverity.Error, "Update Data Grid", ex.Message);
         }
 

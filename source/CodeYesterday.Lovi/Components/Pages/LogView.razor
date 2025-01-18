@@ -4,7 +4,6 @@
 
 @using CodeYesterday.Lovi.Components.Layout
 @using CodeYesterday.Lovi.Helper
-@using CodeYesterday.Lovi.Input
 @using CodeYesterday.Lovi.Models
 @using Serilog.Events
 
@@ -19,18 +18,18 @@ else
     <RadzenStack Orientation="Orientation.Vertical" class="h-100" Gap="0">
         @* Logs data grid *@
         <RadzenDataGrid @ref="_dataGrid" Class="flex-fill w-100"
-                        TItem="LogItemModel" Data="@Model.Session.PagedItems" Count="@Model.Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
-                        AllowColumnReorder="true" AllowColumnResize="true"
-                        AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"
-                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
-                        AllowSorting="true" AllowMultiColumnSorting="true"
-                        AllowColumnPicking="true" Density="Density.Compact"
-                        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems">
+        TItem="LogItemModel" Data="@Model.Session.PagedItems" Count="@Model.Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
+        AllowColumnReorder="true" AllowColumnResize="true"
+        AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"
+        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
+        AllowSorting="true" AllowMultiColumnSorting="true"
+        AllowColumnPicking="true" Density="Density.Compact"
+        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems">
 
             <Columns>
                 <RadzenDataGridColumn Title="Level" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)}")"
-                                      Width="50px" MinWidth="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
-                                      Sortable="true" Filterable="false">
+                Width="50px" MinWidth="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                Sortable="true" Filterable="false">
                     <Template Context="item">
                         @{
                             var (icon, color) = GetLogEventIcon(item.LogEvent);
@@ -40,10 +39,10 @@ else
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")" FormatString="{0:yyyy-MM-dd HH:mm:ss.fff}"
-                                      TextAlign="TextAlign.Right"
-                                      Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
-                                      Sortable="true" Filterable="true"
-                                      SortOrder="SortOrder.Ascending" />
+                TextAlign="TextAlign.Right"
+                Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                Sortable="true" Filterable="true"
+                SortOrder="SortOrder.Ascending" />
 
                 @* Pull columns in LogLevelFilter forward *@
                 @if (Model.Session is not null && !Model.Session.IsImporting)
@@ -58,20 +57,20 @@ else
                 }
 
                 <RadzenDataGridColumn Title="Message" Width="500px" MinWidth="40px"
-                                      Property="@nameof(LogItemModel.RenderedMessage)"
-                                      Sortable="true" Filterable="true" Type="@typeof(string)">
+                Property="@nameof(LogItemModel.RenderedMessage)"
+                Sortable="true" Filterable="true" Type="@typeof(string)">
                     <Template Context="evt">
                         @LogEventHtmlRenderer.RenderedLogMessage(evt)
                     </Template>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Title="Message template" Width="100px" MinWidth="40px" Visible="false"
-                                      Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.MessageTemplate)}")"
-                                      Sortable="true" />
+                Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.MessageTemplate)}")"
+                Sortable="true" />
 
                 <RadzenDataGridColumn Title="Exception" Width="100px" MinWidth="40px"
-                                      Property="@($"{nameof(LogItemModel.ExceptionText)}")"
-                                      Sortable="true" Filterable="true" />
+                Property="@($"{nameof(LogItemModel.ExceptionText)}")"
+                Sortable="true" Filterable="true" />
 
                 @* Property columns *@
                 @if (Model.Session is not null && !Model.Session.IsImporting)
@@ -89,59 +88,27 @@ else
 
 @code
 {
-    protected override void OnInitialized()
+    public override Task OnCreatePanesAsync(IPaneLayout paneLayout, CancellationToken cancellationToken)
     {
-        if (PaneLayout is not null)
-        {
-            PaneLayout.PaneUserSettings = UserSettings;
+        paneLayout.PaneUserSettings = UserSettings;
 
-            PaneLayout.LeftPane = new()
-                    {
-                        Content = @<LogLevelFilterPane CssClass="w-100 h-100" />
-                };
-            PaneLayout.RightPane = new()
-                    {
-                        Content = @<LogEventDataPane CssClass="w-100 h-100" />
-                };
-            PaneLayout.TopPane = new()
-                    {
-                        Content = @<AdvancedFilterPane CssClass="w-100 h-100" />
-                };
-            PaneLayout.BottomPane = new()
-                    {
-                        Content = @<LogEventMessagePane CssClass="w-100 h-100" />
-            };
-            PaneLayout.PanesChanged();
-        }
-
-        if (ToolbarContainer is not null)
+        paneLayout.LeftPane = new()
         {
-            _toolbar ??= new()
-                {
-                    Id = "LogView",
-                    OrderIndex = 0,
-                    Items =
-                            [
-                                new ToolbarButton
-                        {
-                            Icon = "edit",
-                            Tooltip = "Edit session",
-                            Command = new AsyncCommand(OnEditSession)
-                        },
-                        new ToolbarButton
-                        {
-                            Icon = "refresh",
-                            Tooltip = "Refresh",
-                            Command = new AsyncCommand(OnRefreshExecute)
-                        }
-                            ]
-                };
-            ToolbarContainer.AddOrUpdateToolbar(_toolbar);
-        }
-
-        if (StatusBarModel is not null)
+            Content = @<LogLevelFilterPane CssClass="w-100 h-100" />
+        };
+        paneLayout.RightPane = new()
         {
-            StatusBarModel.AddOrUpdateItem(_statusBarItem);
-        }
+            Content = @<LogEventDataPane CssClass="w-100 h-100" />
+        };
+        paneLayout.TopPane = new()
+        {
+            Content = @<AdvancedFilterPane CssClass="w-100 h-100" />
+        };
+        paneLayout.BottomPane = new()
+        {
+            Content = @<LogEventMessagePane CssClass="w-100 h-100" />
+        };
+
+        return Task.CompletedTask;
     }
 }

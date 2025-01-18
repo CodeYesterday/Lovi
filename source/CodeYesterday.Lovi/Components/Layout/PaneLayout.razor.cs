@@ -38,6 +38,18 @@ public partial class PaneLayout : IPaneLayout
 
     public void PanesChanged()
     {
+        if (LeftPane is null && RightPane is null && TopPane is null && BottomPane is null)
+        {
+            if (_panesToolbar is not null)
+            {
+                ToolbarContainer?.RemoveToolbar(_panesToolbar.Id);
+                _panesToolbar = null;
+            }
+
+            InvokeAsync(StateHasChanged);
+            return;
+        }
+
         if (PaneUserSettings is not null)
         {
             LeftPaneWidth = PaneUserSettings.GetValue("Panes.Left.Width", 20d);
@@ -154,8 +166,6 @@ public partial class PaneLayout : IPaneLayout
 
     private void OnPaneResize(RadzenSplitterResizeEventArgs args)
     {
-        //Debug.Print($"New size = {args.NewSize}");
-
         if (ReferenceEquals(args.Pane, _leftPane) && LeftPane is not null)
         {
             PaneUserSettings?.SetValue("Panes.Left.Width", args.NewSize);
