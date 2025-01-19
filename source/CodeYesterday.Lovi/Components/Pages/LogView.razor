@@ -1,12 +1,11 @@
 ﻿@page "/log"
 
-@inherits LoviView
-
 @using CodeYesterday.Lovi.Components.Layout
 @using CodeYesterday.Lovi.Helper
 @using CodeYesterday.Lovi.Models
 @using Serilog.Events
 
+@inherits LoviView
 @layout PaneLayout
 
 @if (Model.Session?.DataStorage is null)

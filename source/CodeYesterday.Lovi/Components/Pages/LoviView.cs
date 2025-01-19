@@ -4,7 +4,7 @@ using CodeYesterday.Lovi.Models;
 using Microsoft.AspNetCore.Components;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
 
-namespace CodeYesterday.Lovi.Components;
+namespace CodeYesterday.Lovi.Components.Pages;
 
 /// <summary>
 /// Base class for views.
@@ -37,7 +37,7 @@ public abstract class LoviView : LoviViewBase
     /// Gets or sets the <see cref="IPaneLayout"/>.
     /// </summary>
     /// <remarks>
-    /// Is set by the <see cref="Components.Layout.PaneLayout"/> as a cascading parameter.
+    /// Is set by the <see cref="Layout.PaneLayout"/> as a cascading parameter.
     /// </remarks>
     [CascadingParameter]
     public IPaneLayout? PaneLayout { get; set; }
@@ -60,7 +60,7 @@ public abstract class LoviView : LoviViewBase
     }
 
     /// <summary>
-    /// Implement to create the panes in a <see cref="Components.Layout.PaneLayout"/> view.
+    /// Implement to create the panes in a <see cref="Layout.PaneLayout"/> view.
     /// </summary>
     /// <param name="paneLayout">The <see cref="IPaneLayout"/> to add the panes to.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>

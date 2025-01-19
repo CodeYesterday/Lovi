@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Serilog.Events;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
 
-namespace CodeYesterday.Lovi.Components;
+namespace CodeYesterday.Lovi.Components.Panes;
 
 public partial class LogLevelFilterPane
 {

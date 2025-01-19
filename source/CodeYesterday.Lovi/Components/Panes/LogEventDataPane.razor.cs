@@ -5,7 +5,7 @@ using Radzen;
 using Radzen.Blazor;
 using Serilog.Events;
 
-namespace CodeYesterday.Lovi.Components;
+namespace CodeYesterday.Lovi.Components.Panes;
 
 public partial class LogEventDataPane
 {

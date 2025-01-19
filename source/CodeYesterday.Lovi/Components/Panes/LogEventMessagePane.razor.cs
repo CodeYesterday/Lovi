@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace CodeYesterday.Lovi.Components;
+namespace CodeYesterday.Lovi.Components.Panes;
 
 public partial class LogEventMessagePane
 {
