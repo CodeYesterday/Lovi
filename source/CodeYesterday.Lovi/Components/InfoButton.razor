@@ -1,0 +1,22 @@
+@using Radzen.Blazor.Rendering
+
+<RadzenButton @ref="_button" @attributes="Attributes"
+              Icon="info" IconColor="steelblue" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+              Click="@(_ => _popup.ToggleAsync(_button.Element))" />
+
+<Popup @ref="_popup" Lacy="true" class="info-popup" Style="@GetPopupStyle()">
+    @ChildContent
+</Popup>
+
+<style type="text/css">
+    .info-popup {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        border: var(--rz-panel-border);
+        background-color: var(--rz-panel-background-color);
+        box-shadow: var(--rz-panel-shadow);
+        border-radius: var(--rz-border-radius);
+        padding: 1em;
+    }
+ </style>
