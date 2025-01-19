@@ -2,7 +2,7 @@
 
 namespace CodeYesterday.Lovi.Models;
 
-internal class AppModel
+public class AppModel
 {
     private LogSession? _session;
 

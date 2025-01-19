@@ -7,7 +7,7 @@ using FileInfo = System.IO.FileInfo;
 
 namespace CodeYesterday.Lovi.Session;
 
-internal class LogSession : IAsyncDisposable
+public class LogSession : IAsyncDisposable
 {
     private const string DataDirectoryName = ".lovi";
     private const string SessionInfoFileName = ".session.lovi";

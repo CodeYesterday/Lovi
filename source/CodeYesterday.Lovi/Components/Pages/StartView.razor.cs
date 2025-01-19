@@ -1,5 +1,4 @@
 ﻿using CodeYesterday.Lovi.Extensions;
-using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
 using CodeYesterday.Lovi.Session;
 using CommunityToolkit.Maui.Storage;
@@ -24,9 +23,6 @@ public partial class StartView
 
     [Inject]
     private IMruService MruService { get; set; } = default!;
-
-    [Inject]
-    private AppModel Model { get; set; } = default!;
 
     private bool DisableButtons { get; set; }
 

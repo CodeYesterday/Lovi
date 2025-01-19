@@ -1,5 +1,4 @@
-﻿using CodeYesterday.Lovi.Models;
-using CodeYesterday.Lovi.Services;
+﻿using CodeYesterday.Lovi.Services;
 using CodeYesterday.Lovi.Session;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -19,14 +18,6 @@ public partial class SessionConfigView
 
     [Inject]
     private IImporterManager ImporterManager { get; set; } = default!;
-
-    [Inject]
-    private ISettingsService SettingsService { get; set; } = default!;
-
-    [Inject]
-    private AppModel Model { get; set; } = default!;
-
-    private LogSession? Session => Model.Session;
 
     private List<ImportSourceViewModel> ImportSources { get; } = new();
 

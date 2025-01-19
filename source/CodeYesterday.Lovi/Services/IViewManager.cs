@@ -20,6 +20,10 @@ public interface IViewManagerInternal : IViewManager
     Task OnOpeningViewAsync(LoviView view);
 
     Task OnViewOpenedAsync(LoviView view);
+
+    Task OnOpeningPaneAsync(LoviPane pane);
+
+    Task OnPaneOpenedAsync(LoviPane pane);
 }
 
 public enum ViewId

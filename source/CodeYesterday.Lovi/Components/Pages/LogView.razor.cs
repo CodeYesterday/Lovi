@@ -20,12 +20,6 @@ public partial class LogView
     private NotificationService NotificationService { get; set; } = default!;
 
     [Inject]
-    private ISettingsService SettingsService { get; set; } = default!;
-
-    [Inject]
-    private AppModel Model { get; set; } = default!;
-
-    [Inject]
     private IUserSettingsService<LogView> UserSettings { get; set; } = default!;
 
     public override Task OnOpeningAsync(CancellationToken cancellationToken)

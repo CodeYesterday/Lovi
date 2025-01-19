@@ -17,7 +17,10 @@
   "endTime": null,
   "logLevelFilterSettings": {
     "": {
-      "properties": [],
+      "properties": [
+        "Application",
+        "SourceContext"
+      ],
       "layersSettings": {}
     }
   }

@@ -1,5 +1,4 @@
 ﻿using CodeYesterday.Lovi.Models;
-using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
@@ -11,12 +10,6 @@ public partial class AdvancedFilterPane
     private RadzenDataFilter<LogItemModel>? _dataFilter;
 
     [Parameter] public string? CssClass { get; set; }
-
-    [Inject]
-    private AppModel Model { get; set; } = default!;
-
-    [Inject]
-    private ISettingsService SettingsService { get; set; } = default!;
 
     private Task ApplyFilter()
     {

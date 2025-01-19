@@ -17,9 +17,11 @@ internal class ViewManager : IViewManagerInternal
         { ViewId.LogView, "/log" }
     };
 
-    private NavigationManager? _navigationManager;
+    private readonly List<LoviPane> _panes = new();
 
+    private NavigationManager? _navigationManager;
     private LoviView? _lastView;
+    private List<LoviPane>? _lastPanes;
     private Toolbar[]? _toolbars;
     private StatusBarItem[]? _statusBarItems;
 
@@ -98,23 +100,41 @@ internal class ViewManager : IViewManagerInternal
         return view.OnOpenedAsync(CancellationToken.None);
     }
 
+    public Task OnOpeningPaneAsync(LoviPane pane)
+    {
+        _panes.Add(pane);
+        return pane.OnOpeningAsync(CancellationToken.None);
+    }
+
+    public Task OnPaneOpenedAsync(LoviPane pane)
+    {
+        Debug.Assert(_panes.Contains(pane), "PaneOpened called but OpeningPane was not");
+
+        return pane.OnOpenedAsync(CancellationToken.None);
+    }
+
     [MemberNotNull(nameof(_navigationManager))]
     private void CheckInitialized()
     {
         if (_navigationManager is null) throw new InvalidOperationException("ViewManager was not initialized");
     }
 
-    private ValueTask OnLocationChanging(LocationChangingContext arg)
+    private async ValueTask OnLocationChanging(LocationChangingContext arg)
     {
+        _lastPanes = [.. _panes];
+        foreach (var pane in _lastPanes)
+        {
+            await pane.OnClosingAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+        _panes.Clear();
+
         _lastView = CurrentView;
         if (_lastView is not null)
         {
-            _ = _lastView.OnClosingAsync(CancellationToken.None);
+            await _lastView.OnClosingAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         CurrentView = null;
-
-        return ValueTask.CompletedTask;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -124,6 +144,16 @@ internal class ViewManager : IViewManagerInternal
 
     private void OnViewClosed()
     {
+        if (_lastPanes is not null)
+        {
+            foreach (var pane in _lastPanes)
+            {
+                _ = pane.OnClosedAsync(CancellationToken.None);
+            }
+
+            _lastPanes = null;
+        }
+
         if (_lastView is not null)
         {
             if (_lastView.PaneLayout is not null)

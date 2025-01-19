@@ -1,7 +1,5 @@
 ﻿using CodeYesterday.Lovi.Input;
 using CodeYesterday.Lovi.Models;
-using CodeYesterday.Lovi.Services;
-using CodeYesterday.Lovi.Session;
 using Microsoft.AspNetCore.Components;
 using Serilog.Events;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
@@ -12,13 +10,7 @@ public partial class LogLevelFilterPane
 {
     [Parameter] public string? CssClass { get; set; }
 
-    [Inject]
-    private ISettingsService SettingsService { get; set; } = default!;
-
-    [Inject]
-    private AppModel Model { get; set; } = default!;
-
-    private LogLevelFilterModel? LogLevelFilter => Model.Session?.LogLevelFilter;
+    private LogLevelFilterModel? LogLevelFilter => Session?.LogLevelFilter;
 
     private Toolbar Toolbar { get; }
 
@@ -47,15 +39,23 @@ public partial class LogLevelFilterPane
         };
     }
 
-    protected override void OnInitialized()
+    public override async Task OnOpeningAsync(CancellationToken cancellationToken)
     {
-        base.OnInitialized();
+        await base.OnOpeningAsync(cancellationToken);
 
-        Model.SessionChanged += OnSessionChanged;
-
-        if (Model.Session is null || LogLevelFilter is null) return;
+        if (LogLevelFilter is null) return;
 
         LogLevelFilter.FilterChanged += OnStateHasChanged;
+    }
+
+    public override Task OnClosingAsync(CancellationToken cancellationToken)
+    {
+        if (LogLevelFilter is not null)
+        {
+            LogLevelFilter.FilterChanged -= OnStateHasChanged;
+        }
+
+        return base.OnClosingAsync(cancellationToken);
     }
 
     private async Task OnExpandCollapseAllAsync(object? parameter)
@@ -65,18 +65,6 @@ public partial class LogLevelFilterPane
         LogLevelFilter?.RootLayer.ExpandCollapseAll(expand);
 
         await InvokeAsync(StateHasChanged);
-    }
-
-    private void OnSessionChanged(object? sender, ChangedEventArgs<LogSession> e)
-    {
-        if (e.OldValue is not null)
-        {
-            e.OldValue.LogLevelFilter.FilterChanged -= OnStateHasChanged;
-        }
-        if (e.NewValue is not null)
-        {
-            e.NewValue.LogLevelFilter.FilterChanged += OnStateHasChanged;
-        }
     }
 
     private void OnStateHasChanged(object? sender, EventArgs e)

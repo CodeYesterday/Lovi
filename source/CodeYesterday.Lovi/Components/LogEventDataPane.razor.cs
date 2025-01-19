@@ -1,7 +1,5 @@
 ﻿using CodeYesterday.Lovi.Helper;
 using CodeYesterday.Lovi.Models;
-using CodeYesterday.Lovi.Services;
-using CodeYesterday.Lovi.Session;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
@@ -18,38 +16,26 @@ public partial class LogEventDataPane
     [Inject]
     private TooltipService TooltipService { get; set; } = default!;
 
-    [Inject]
-    private ISettingsService SettingsService { get; set; } = default!;
-
-    [Inject]
-    private AppModel AppModel { get; set; } = default!;
-
-    private LogItemModel? SelectedItem => AppModel.Session?.SelectedLogItem;
-
     private List<ItemModel> Data { get; set; } = [];
 
-    protected override void OnInitialized()
+    public override async Task OnOpeningAsync(CancellationToken cancellationToken)
     {
-        base.OnInitialized();
+        await base.OnOpeningAsync(cancellationToken);
 
-        AppModel.SessionChanged += OnSessionChanged;
-
-        if (AppModel.Session is not null)
+        if (Session is not null)
         {
-            AppModel.Session.SelectedLogItemModelChanged += OnSelectedLogItemModelChanged;
+            Session.SelectedLogItemModelChanged += OnSelectedLogItemModelChanged;
         }
     }
 
-    private void OnSessionChanged(object? sender, ChangedEventArgs<LogSession> e)
+    public override Task OnClosingAsync(CancellationToken cancellationToken)
     {
-        if (e.OldValue is not null)
+        if (Session is not null)
         {
-            e.OldValue.SelectedLogItemModelChanged -= OnSelectedLogItemModelChanged;
+            Session.SelectedLogItemModelChanged -= OnSelectedLogItemModelChanged;
         }
-        if (e.NewValue is not null)
-        {
-            e.NewValue.SelectedLogItemModelChanged += OnSelectedLogItemModelChanged;
-        }
+
+        return base.OnClosingAsync(cancellationToken);
     }
 
     private void OnSelectedLogItemModelChanged(object? sender, ChangedEventArgs<LogItemModel> e)
