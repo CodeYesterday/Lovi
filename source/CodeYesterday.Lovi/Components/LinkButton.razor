@@ -1,0 +1,12 @@
+<RadzenButton Text="@(Text ?? Uri)" class="link" @attributes="Attributes" Icon="open_in_new"
+              ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+              MouseEnter="e => OpenTooltip(e)"
+              Click="OpenUri" />
+              
+<style>
+    .link {
+        color: var(--rz-link-color) !important;
+        text-decoration: var(--rz-link-text-decoration) !important;
+        cursor: pointer !important;
+    }
+</style>
