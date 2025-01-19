@@ -20,6 +20,6 @@ public partial class StatusBarItemControl
     {
         if (string.IsNullOrEmpty(tooltip)) return;
 
-        TooltipService.Open(element, tooltip, SettingsService.GetSettings().TooltipOptions);
+        TooltipService.Open(element, tooltip, SettingsService.Settings.TooltipOptions);
     }
 }

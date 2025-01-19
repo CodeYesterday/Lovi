@@ -16,12 +16,12 @@ public class SettingsModel
         /// <summary>
         /// Gets or sets the icon for the log level.
         /// </summary>
-        public required string Icon { get; set; }
+        public string Icon { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the color for the log level.
         /// </summary>
-        public required string Color { get; set; }
+        public string Color { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the contrast color for the log level.
@@ -51,7 +51,7 @@ public class SettingsModel
     /// <summary>
     /// Gets or set the timestamp format.
     /// </summary>
-    public string TimestampFormat { get; set; } = "yyyy-MM-dd HH:mm:ss.fff";
+    public string TimestampFormat { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets the timestamp format string.
@@ -65,45 +65,12 @@ public class SettingsModel
     {
         LogLevels = Enum.GetValues<LogEventLevel>().OrderByDescending(l => (int)l).ToArray();
 
-        // TODO: Set te secondary colors which are used for checkbox hovering to a slightly brighter color.
-        LogLevelSettings.Add(LogEventLevel.Fatal, new()
-        {
-            Icon = "crisis_alert",
-            Color = "mediumvioletred"
-        });
-
-        LogLevelSettings.Add(LogEventLevel.Error, new()
-        {
-            Icon = "error",
-            Color = "red"
-        });
-
-        LogLevelSettings.Add(LogEventLevel.Warning, new()
-        {
-            Icon = "warning",
-            Color = "orange",
-            ContrastColor = "black"
-        });
-
-        LogLevelSettings.Add(LogEventLevel.Information, new()
-        {
-            Icon = "info",
-            Color = "steelblue"
-        });
-
-        LogLevelSettings.Add(LogEventLevel.Debug, new()
-        {
-            Icon = "adb",
-            Color = "darkgray",
-            ContrastColor = "black"
-        });
-
-        LogLevelSettings.Add(LogEventLevel.Verbose, new()
-        {
-            Icon = "density_small",
-            Color = "lightsalmon",
-            ContrastColor = "black"
-        });
+        LogLevelSettings.Add(LogEventLevel.Fatal, new());
+        LogLevelSettings.Add(LogEventLevel.Error, new());
+        LogLevelSettings.Add(LogEventLevel.Warning, new());
+        LogLevelSettings.Add(LogEventLevel.Information, new());
+        LogLevelSettings.Add(LogEventLevel.Debug, new());
+        LogLevelSettings.Add(LogEventLevel.Verbose, new());
     }
 
     /// <summary>
@@ -117,5 +84,16 @@ public class SettingsModel
         if (LogLevelSettings.TryGetValue(logLevel, out var settings)) return settings;
 
         throw new ArgumentException($"logLevel {logLevel} is invalid", nameof(logLevel));
+    }
+
+    public string GetCheckBoxColorStyles(LogEventLevel logLevel)
+    {
+        var logLevelSettings = GetLogLevelSettings(logLevel);
+
+        return
+            $"--rz-checkbox-checked-background-color: {logLevelSettings.Color}; " +
+            $"--rz-input-background-color: {logLevelSettings.Color}; " +
+            $"--rz-checkbox-checked-hover-background-color: color-mix(in srgb, {logLevelSettings.Color}, white 20%);" +
+            (logLevelSettings.ContrastColor is null ? string.Empty : $" --rz-checkbox-checked-color: {logLevelSettings.ContrastColor};");
     }
 }

@@ -44,10 +44,10 @@ public partial class LogEventDataPane
         var logItem = e.NewValue;
         if (logItem is not null)
         {
-            var logLevelSettings = SettingsService.GetSettings().GetLogLevelSettings(logItem.LogEvent.Level);
+            var logLevelSettings = SettingsService.Settings.GetLogLevelSettings(logItem.LogEvent.Level);
             // TODO: The icon does not render like this. Probably have to switch to RenderFragment instead of markup string.
             Data.Add(new() { PropertyName = "Level", ValueMarkup = $"<RadzenIcon Icon=\"{logLevelSettings.Icon}\" IconColor=\"{logLevelSettings.Color}\"/> {logItem.LogEvent.Level}" });
-            Data.Add(new() { PropertyName = "Timestamp", ValueMarkup = logItem.LogEvent.Timestamp.ToString(SettingsService.GetSettings().TimestampFormat) });
+            Data.Add(new() { PropertyName = "Timestamp", ValueMarkup = logItem.LogEvent.Timestamp.ToString(SettingsService.Settings.TimestampFormat) });
             Data.Add(new() { PropertyName = "Message", ValueMarkup = LogEventHtmlRenderer.Render(logItem.LogEvent.MessageTemplate, logItem.LogEvent.Properties, false) });
             Data.Add(new() { PropertyName = "Message template", ValueMarkup = logItem.LogEvent.MessageTemplate.Text });
             Data.Add(new() { PropertyName = "Exception", ValueMarkup = logItem.LogEvent.Exception?.ToString() ?? string.Empty });
@@ -123,6 +123,6 @@ public partial class LogEventDataPane
 
     private void ShowValueTooltip(ElementReference element, ItemModel item)
     {
-        TooltipService.Open(element, _ => item.RenderedValue, SettingsService.GetSettings().TooltipOptions);
+        TooltipService.Open(element, _ => item.RenderedValue, SettingsService.Settings.TooltipOptions);
     }
 }

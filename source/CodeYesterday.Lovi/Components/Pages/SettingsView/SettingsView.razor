@@ -1,0 +1,36 @@
+@page "/settings"
+
+@inherits LoviView
+
+<RadzenStack Orientation="Orientation.Horizontal" class="w-100 h-100">
+    <div class="sidebar">
+        <RadzenPanelMenu>
+            @foreach (var category in Categories)
+            {
+                <RadzenPanelMenuItem Text="@(category.Title)" Icon="@(category.Icon)" Expanded="true">
+                    @foreach (var page in category.Pages)
+                    {
+                        <RadzenPanelMenuItem Text="@(page.Title)" Icon="@(page.Icon)" Click="_ => ShowPage(page)"
+                                             Selected="@ReferenceEquals(page, SelectedPage)"/>
+                    }
+                </RadzenPanelMenuItem>
+            }
+        </RadzenPanelMenu>
+    </div>
+    
+    <RadzenStack Orientation="Orientation.Vertical" class="flex-fill h-100 rz-p-2">
+        <RadzenText Text="@SelectedPage.Title" TextStyle="TextStyle.H5" />
+        
+        @RenderPage(SelectedPage)
+    </RadzenStack>
+
+</RadzenStack>
+
+<style>
+    .sidebar {
+        background-color: var(--rz-sidebar-background-color);
+        min-width: 200px;
+        height: 100%;
+        padding: 0.5em;
+    }
+</style>

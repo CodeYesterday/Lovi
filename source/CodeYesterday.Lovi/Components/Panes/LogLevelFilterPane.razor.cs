@@ -1,7 +1,6 @@
 ﻿using CodeYesterday.Lovi.Input;
 using CodeYesterday.Lovi.Models;
 using Microsoft.AspNetCore.Components;
-using Serilog.Events;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
 
 namespace CodeYesterday.Lovi.Components.Panes;
@@ -70,16 +69,5 @@ public partial class LogLevelFilterPane
     private void OnStateHasChanged(object? sender, EventArgs e)
     {
         InvokeAsync(StateHasChanged);
-    }
-
-    private string GetCheckBoxColorStyles(LogEventLevel logLevel)
-    {
-        var logLevelSettings = SettingsService.GetSettings().GetLogLevelSettings(logLevel);
-
-        return
-            $"--rz-checkbox-checked-background-color: {logLevelSettings.Color}; " +
-            $"--rz-input-background-color: {logLevelSettings.Color}; " +
-            $"--rz-checkbox-checked-hover-background-color: color-mix(in srgb, {logLevelSettings.Color}, white 20%);" +
-            (logLevelSettings.ContrastColor is null ? string.Empty : $" --rz-checkbox-checked-color: {logLevelSettings.ContrastColor};");
     }
 }

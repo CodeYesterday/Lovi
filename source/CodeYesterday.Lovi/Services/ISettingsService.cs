@@ -4,5 +4,9 @@ namespace CodeYesterday.Lovi.Services;
 
 public interface ISettingsService
 {
-    SettingsModel GetSettings();
+    SettingsModel Settings { get; }
+
+    Task LoadSettingsAsync(CancellationToken cancellationToken);
+
+    Task SaveSettingsAsync(CancellationToken cancellationToken);
 }

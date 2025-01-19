@@ -145,10 +145,10 @@ else
                         <RadzenText Text="@Stats.LogItemCount.ToString()" />
 
                         <RadzenLabel Text="First timestamp:" />
-                        <RadzenText Text="@Stats.FirstItemTimestamp.ToString(SettingsService.GetSettings().TimestampFormat)" />
+                        <RadzenText Text="@Stats.FirstItemTimestamp.ToString(SettingsService.Settings.TimestampFormat)" />
 
                         <RadzenLabel Text="Last timestamp:" />
-                        <RadzenText Text="@Stats.LastItemTimestamp.ToString(SettingsService.GetSettings().TimestampFormat)" />
+                        <RadzenText Text="@Stats.LastItemTimestamp.ToString(SettingsService.Settings.TimestampFormat)" />
                     }
                 </RadzenStack>
             </RadzenFormField>
@@ -176,7 +176,6 @@ else
 }
 
 <style>
-    @* Extend the form field style *@
     .rz-form-field-content {
         height: 100%;
     }

@@ -8,7 +8,7 @@
 }
 else
 {
-    var logItemSettings = SettingsService.GetSettings().GetLogLevelSettings(SelectedItem.LogEvent.Level);
+    var logItemSettings = SettingsService.Settings.GetLogLevelSettings(SelectedItem.LogEvent.Level);
 
     <RadzenSplitter Orientation="Orientation.Horizontal" class="flex-fill">
         <RadzenSplitterPane Size="50%" Collapsible="false">
@@ -16,7 +16,7 @@ else
                 <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="4px">
                     <RadzenIcon Icon="@logItemSettings.Icon" IconColor="@logItemSettings.Color" />
 
-                    <RadzenText Text="@(SelectedItem.LogEvent.Timestamp.ToString(SettingsService.GetSettings().TimestampFormat))"/>
+                    <RadzenText Text="@(SelectedItem.LogEvent.Timestamp.ToString(SettingsService.Settings.TimestampFormat))"/>
 
                     <RadzenButton Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-ml-auto"
                                   Icon="content_copy"

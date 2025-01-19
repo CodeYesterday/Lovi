@@ -18,7 +18,7 @@ else
                 </RadzenDataFilterProperty>
 
                 <RadzenDataFilterProperty Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")"
-                                          FormatString="@SettingsService.GetSettings().TimestampFormatString" />
+                                          FormatString="@SettingsService.Settings.TimestampFormatString" />
 
                 <RadzenDataFilterProperty Title="Message" Property="@($"{nameof(LogItemModel.RenderedMessage)}")" />
 

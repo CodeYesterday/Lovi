@@ -1,0 +1,128 @@
+@using CodeYesterday.Lovi.Models
+@using Serilog.Events
+
+@inherits SettingsPage
+
+@if (Settings is null)
+{
+    <RadzenText Text="No settings" />
+}
+else
+{
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5em">
+        <RadzenText Text="Icons/colors" TextStyle="TextStyle.H6" />
+
+        <table>
+            <tr>
+                <th>
+                    Log level
+                </th>
+                <th>
+                    @* TODO: Add hint and link to material icons https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Outlined&icon.size=24&icon.color=%23e8eaed *@
+                    Icon
+                </th>
+                <th>
+                    Color
+                </th>
+                <th>
+                    Contrast color
+                </th>
+            </tr>
+
+            @foreach (var logLevel in Settings.LogLevels)
+            {
+                var logLevelSettings = Settings.GetLogLevelSettings(logLevel);
+
+                <tr>
+                    <th>
+                        <RadzenLabel Text="@(logLevel.ToString())" />
+                    </th>
+                    <td>
+                        <RadzenTextBox @bind-Value="logLevelSettings.Icon" class="w-100" />
+                    </td>
+                    <td>
+                        <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+                            <RadzenTextBox @bind-Value="logLevelSettings.Color" class="flex-fill" />
+                            <RadzenColorPicker @bind-Value="logLevelSettings.Color" ShowColors="true" ShowHSV="true" ShowRGBA="true" />
+                        </RadzenStack>
+                    </td>
+                    <td>
+                        <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+                            <RadzenTextBox @bind-Value="logLevelSettings.ContrastColor" class="flex-fill" />
+                            <RadzenColorPicker @bind-Value="logLevelSettings.ContrastColor" ShowColors="true" ShowHSV="true" ShowRGBA="true" />
+                        </RadzenStack>
+                    </td>
+                </tr>
+            }
+        </table>
+
+        <RadzenText Text="Timestamp" TextStyle="TextStyle.H6" />
+        
+        @* TODO: Add hint about format *@
+        <RadzenTextBox @bind-Value="Settings.TimestampFormat" Style="width:200px" />
+
+        <RadzenText Text="Preview" TextStyle="TextStyle.H6" />
+
+        <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+
+            <RadzenDataGrid Style="width: 520px; height: 230px;"
+                            TItem="LogItemModel" Data="@PreviewLogItems"
+                            AllowColumnReorder="true" AllowColumnResize="true"
+                            AllowFiltering="false"
+                            AllowColumnPicking="false" Density="Density.Compact"
+                            SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems">
+
+                <Columns>
+                    <RadzenDataGridColumn Title="Level" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)}")"
+                                          Width="50px" MinWidth="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                                          Sortable="true" Filterable="false">
+                        <Template Context="item">
+                            @{
+                                var itemSettings = Settings.GetLogLevelSettings(item.LogEvent.Level);
+                                <RadzenIcon Icon="@(itemSettings.Icon)" IconColor="@(itemSettings.Color)" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")"
+                                          FormatString="@Settings.TimestampFormatString"
+                                          TextAlign="TextAlign.Right"
+                                          Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                                          Sortable="true" Filterable="true"
+                                          SortOrder="SortOrder.Ascending" />
+
+                    <RadzenDataGridColumn Title="Message" Width="300px" MinWidth="40px"
+                                          Property="@nameof(LogItemModel.RenderedMessage)"
+                                          Sortable="true" Filterable="true" Type="@typeof(string)">
+                        <Template Context="evt">
+                            @evt.LogEvent.MessageTemplate.Text
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+            
+            <RadzenStack Orientation="Orientation.Vertical" Gap="3px">
+                @foreach (var layer in PreviewLogLevelFilterLayers)
+                {
+                    @LevelCheckBoxes(layer)
+                }
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+}
+
+@code
+{
+    RenderFragment LevelCheckBoxes(LogLevelFilterLayerModel layer) =>
+        @<RadzenStack Orientation="Orientation.Horizontal" Gap="0" class="rz-ml-auto">
+        @if (Settings is not null)
+        {
+            foreach (var logLevel in Settings.LogLevels)
+            {
+                <RadzenCheckBox @bind-value="@layer[logLevel]" class="rz-m-0"
+                                Style="@(Settings.GetCheckBoxColorStyles(logLevel))"
+                                TriState="@layer.IsLevelTriState"/>
+            }
+        }
+        </RadzenStack>;
+}

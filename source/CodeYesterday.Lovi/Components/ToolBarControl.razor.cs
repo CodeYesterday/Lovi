@@ -25,7 +25,7 @@ public partial class ToolbarControl
     {
         if (string.IsNullOrEmpty(tooltip)) return;
 
-        TooltipService.Open(element, tooltip, SettingsService.GetSettings().TooltipOptions);
+        TooltipService.Open(element, tooltip, SettingsService.Settings.TooltipOptions);
     }
 
     private void OpenButtonMenu(MouseEventArgs args, ToolbarMenuButton menuButton)

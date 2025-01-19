@@ -4,7 +4,6 @@ using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
-using Serilog.Events;
 using System.Diagnostics;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
 
@@ -69,15 +68,17 @@ public partial class LogView
         ]);
     }
 
-    public override Task OnClosingAsync(CancellationToken cancellationToken)
+    public override async Task OnClosingAsync(CancellationToken cancellationToken)
     {
-        if (Model.Session is not null)
+        if (Session is not null)
         {
-            Model.Session.PropertiesChanged -= OnPropertiesChanged;
-            Model.Session.Refreshing -= OnRefreshing;
+            Session.PropertiesChanged -= OnPropertiesChanged;
+            Session.Refreshing -= OnRefreshing;
+
+            await Session.SaveDataAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        return base.OnClosingAsync(cancellationToken);
+        await base.OnClosingAsync(cancellationToken).ConfigureAwait(true);
     }
 
     private IList<LogItemModel>? SelectedItems
@@ -92,7 +93,6 @@ public partial class LogView
 
     private void OnRefreshing(object? sender, EventArgs e)
     {
-        //_dataGrid.RefreshDataAsync();
         InvokeAsync(_dataGrid.Reload);
     }
 
@@ -120,12 +120,6 @@ public partial class LogView
         }
 
         OnUpdateStatusBarItem();
-    }
-
-    private (string icon, string color) GetLogEventIcon(LogEvent evt)
-    {
-        var logLevelSettings = SettingsService.GetSettings().GetLogLevelSettings(evt.Level);
-        return (logLevelSettings.Icon, logLevelSettings.Color);
     }
 
     private Task OnEditSession(object? _)

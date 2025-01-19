@@ -8,7 +8,7 @@
 @inherits LoviView
 @layout PaneLayout
 
-@if (Model.Session?.DataStorage is null)
+@if (Session?.DataStorage is null)
 {
     <RadzenText Text="No session loaded" />
 }
@@ -17,7 +17,7 @@ else
     <RadzenStack Orientation="Orientation.Vertical" class="h-100" Gap="0">
         @* Logs data grid *@
         <RadzenDataGrid @ref="_dataGrid" Class="flex-fill w-100"
-                        TItem="LogItemModel" Data="@Model.Session.PagedItems" Count="@Model.Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
+                        TItem="LogItemModel" Data="@Session.PagedItems" Count="@Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
                         AllowColumnReorder="true" AllowColumnResize="true"
                         AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"
                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
@@ -31,29 +31,26 @@ else
                                       Sortable="true" Filterable="false">
                     <Template Context="item">
                         @{
-                            var (icon, color) = GetLogEventIcon(item.LogEvent);
-                            <RadzenIcon Icon="@icon" IconColor="@color" />
+                            var itemSettings = SettingsService.Settings.GetLogLevelSettings(item.LogEvent.Level);
+                            <RadzenIcon Icon="@(itemSettings.Icon)" IconColor="@(itemSettings.Color)" />
                         }
                     </Template>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")"
-                                      FormatString="@SettingsService.GetSettings().TimestampFormatString"
+                                      FormatString="@SettingsService.Settings.TimestampFormatString"
                                       TextAlign="TextAlign.Right"
                                       Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
                                       Sortable="true" Filterable="true"
                                       SortOrder="SortOrder.Ascending" />
 
                 @* Pull columns in LogLevelFilter forward *@
-                @if (Model.Session is not null && !Model.Session.IsImporting)
+                @foreach (var property in Session.LogLevelFilter.ActualLayerProperties
+                   .Select(pn => Session.DataStorage.Properties
+                   .FirstOrDefault(p => string.Equals(p.Name, pn, StringComparison.Ordinal)))
+                   .Where(pn => pn is not null))
                 {
-                    foreach (var property in Model.Session.LogLevelFilter.ActualLayerProperties
-                    .Select(pn => Model.Session.DataStorage.Properties
-                    .FirstOrDefault(p => string.Equals(p.Name, pn, StringComparison.Ordinal)))
-                    .Where(pn => pn is not null))
-                    {
-                        @RenderPropertyColumn(property!)
-                    }
+                    @RenderPropertyColumn(property!)
                 }
 
                 <RadzenDataGridColumn Title="Message" Width="500px" MinWidth="40px"
@@ -73,10 +70,8 @@ else
                                       Sortable="true" Filterable="true" />
 
                 @* Property columns *@
-                @if (Model.Session is not null && !Model.Session.IsImporting)
-                {
-                    foreach (var property in Model.Session.DataStorage.Properties
-                    .Where(p => !Model.Session.LogLevelFilter.ActualLayerProperties.Contains(p.Name)))
+                @foreach (var property in Session.DataStorage.Properties
+                    .Where(p => !Session.LogLevelFilter.ActualLayerProperties.Contains(p.Name)))
                     {
                         @RenderPropertyColumn(property)
                     }
