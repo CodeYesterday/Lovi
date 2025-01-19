@@ -7,7 +7,7 @@
     private const ButtonStyle ButtonStyle = Radzen.ButtonStyle.Base;
 }
 
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0" class="tool-bar-style">
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="@(Toolbar?.AddGap == true ? "0.5em" : "0")" class="tool-bar-style">
     @if (Toolbar != null)
     {
         foreach (var toolBarItem in Toolbar.Items)
@@ -19,7 +19,9 @@
                                   Icon="@button.Icon"
                                   Visible="@button.IsVisible"
                                   Disabled="@(!button.Command.CanExecute(button.CommandParameter))"
-                                  Variant="ButtonVariant" ButtonStyle="ButtonStyle" Size="ButtonSize"
+                                  Variant="@(button.ButtonVariant ?? ButtonVariant)"
+                                  ButtonStyle="@(button.ButtonStyle ?? ButtonStyle)"
+                                  Size="ButtonSize"
                                   Click="@(() => button.Command.Execute(button.CommandParameter))"
                                   MouseEnter="e => OnShowToolbarItemTooltip(e, toolBarItem.Tooltip)" />
                     break;

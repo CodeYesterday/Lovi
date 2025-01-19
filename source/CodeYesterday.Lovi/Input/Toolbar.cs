@@ -6,6 +6,8 @@ public class Toolbar
 
     public int OrderIndex { get; init; }
 
+    public bool AddGap { get; set; }
+
     public IList<ToolbarItem> Items { get; init; } = [];
 
     public event EventHandler? Removed;
