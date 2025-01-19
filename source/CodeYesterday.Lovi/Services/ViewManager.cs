@@ -11,11 +11,12 @@ namespace CodeYesterday.Lovi.Services;
 
 internal class ViewManager : IViewManagerInternal
 {
-    private static readonly Dictionary<ViewId, string> Views = new Dictionary<ViewId, string>()
+    private static readonly Dictionary<ViewId, string> Views = new()
     {
         { ViewId.StartView, "/" },
         { ViewId.SessionConfig, "/session_config" },
-        { ViewId.LogView, "/log" }
+        { ViewId.LogView, "/log" },
+        { ViewId.Settings, "/settings" }
     };
 
     private readonly List<LoviPane> _panes = new();
@@ -26,17 +27,33 @@ internal class ViewManager : IViewManagerInternal
     private Toolbar[]? _toolbars;
     private StatusBarItem[]? _statusBarItems;
 
+    public ViewId? PreviousViewId { get; private set; }
+
+    public ViewId CurrentViewId { get; private set; } = ViewId.StartView;
+
     public LoviView? CurrentView { get; private set; }
 
-    public Task ShowViewAsync(ViewId id, CancellationToken cancellationToken)
+    public Task NavigateToAsync(ViewId id, CancellationToken cancellationToken)
     {
         CheckInitialized();
 
         if (!Views.TryGetValue(id, out var uri)) throw new ArgumentOutOfRangeException(nameof(id), id, null);
 
+        PreviousViewId = CurrentViewId;
+        CurrentViewId = id;
+
         _navigationManager.NavigateTo(uri);
 
         return Task.CompletedTask;
+    }
+
+    public async Task<bool> NavigateBackAsync(CancellationToken cancellationToken)
+    {
+        if (!PreviousViewId.HasValue) return false;
+
+        await NavigateToAsync(PreviousViewId.Value, cancellationToken).ConfigureAwait(true);
+
+        return true;
     }
 
     public void SetNavigationManager(NavigationManager navigationManager)

@@ -104,12 +104,12 @@ public partial class MainLayout
             Model.Session = null;
         }
 
-        await ViewManagerInternal.ShowViewAsync(ViewId.StartView, CancellationToken.None).ConfigureAwait(true);
+        await ViewManagerInternal.NavigateToAsync(ViewId.StartView, CancellationToken.None).ConfigureAwait(true);
     }
 
     private Task OnShowSettings(object? parameter)
     {
-        return Task.CompletedTask;
+        return ViewManagerInternal.NavigateToAsync(ViewId.Settings, CancellationToken.None);
     }
 
     private Task OnShowHelp(object? parameter)

@@ -124,7 +124,7 @@ public partial class SessionConfigView
         {
             await ImportDataAsync(CancellationToken.None).ConfigureAwait(true);
 
-            await ViewManager.ShowViewAsync(ViewId.LogView, CancellationToken.None).ConfigureAwait(true);
+            await ViewManager.NavigateToAsync(ViewId.LogView, CancellationToken.None).ConfigureAwait(true);
         }
         catch (Exception ex)
         {

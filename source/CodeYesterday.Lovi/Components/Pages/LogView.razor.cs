@@ -130,7 +130,7 @@ public partial class LogView
 
     private Task OnEditSession(object? _)
     {
-        return ViewManager.ShowViewAsync(ViewId.SessionConfig, CancellationToken.None);
+        return ViewManager.NavigateToAsync(ViewId.SessionConfig, CancellationToken.None);
     }
 
     private Task OnRefreshExecute(object? _)

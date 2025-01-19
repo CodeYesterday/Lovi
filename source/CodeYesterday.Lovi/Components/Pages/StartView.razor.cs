@@ -126,7 +126,7 @@ public partial class StartView
 
         Model.Session = session;
 
-        await ViewManager.ShowViewAsync(ViewId.SessionConfig, CancellationToken.None).ConfigureAwait(true);
+        await ViewManager.NavigateToAsync(ViewId.SessionConfig, CancellationToken.None).ConfigureAwait(true);
     }
 
     private async Task OnOpenSession(bool openConfigView)
@@ -228,7 +228,7 @@ public partial class StartView
 
             Model.Session = session;
 
-            await ViewManager.ShowViewAsync(viewId, CancellationToken.None).ConfigureAwait(true);
+            await ViewManager.NavigateToAsync(viewId, CancellationToken.None).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
