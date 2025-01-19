@@ -16,12 +16,12 @@ public class SettingsModel
         /// <summary>
         /// Gets or sets the icon for the log level.
         /// </summary>
-        public string Icon { get; set; } = string.Empty;
+        public required string Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the color for the log level.
         /// </summary>
-        public string Color { get; set; } = string.Empty;
+        public required string Color { get; set; }
 
         /// <summary>
         /// Gets or sets the contrast color for the log level.
@@ -51,7 +51,7 @@ public class SettingsModel
     /// <summary>
     /// Gets or set the timestamp format.
     /// </summary>
-    public string TimestampFormat { get; set; } = string.Empty;
+    public string TimestampFormat { get; set; } = "yyyy-MM-dd HH:mm:ss.fff";
 
     /// <summary>
     /// Gets the timestamp format string.
@@ -65,12 +65,44 @@ public class SettingsModel
     {
         LogLevels = Enum.GetValues<LogEventLevel>().OrderByDescending(l => (int)l).ToArray();
 
-        LogLevelSettings.Add(LogEventLevel.Fatal, new());
-        LogLevelSettings.Add(LogEventLevel.Error, new());
-        LogLevelSettings.Add(LogEventLevel.Warning, new());
-        LogLevelSettings.Add(LogEventLevel.Information, new());
-        LogLevelSettings.Add(LogEventLevel.Debug, new());
-        LogLevelSettings.Add(LogEventLevel.Verbose, new());
+        LogLevelSettings.Add(LogEventLevel.Fatal, new()
+        {
+            Icon = "crisis_alert",
+            Color = "mediumvioletred"
+        });
+
+        LogLevelSettings.Add(LogEventLevel.Error, new()
+        {
+            Icon = "error",
+            Color = "red"
+        });
+
+        LogLevelSettings.Add(LogEventLevel.Warning, new()
+        {
+            Icon = "warning",
+            Color = "orange",
+            ContrastColor = "black"
+        });
+
+        LogLevelSettings.Add(LogEventLevel.Information, new()
+        {
+            Icon = "info",
+            Color = "steelblue"
+        });
+
+        LogLevelSettings.Add(LogEventLevel.Debug, new()
+        {
+            Icon = "adb",
+            Color = "darkgray",
+            ContrastColor = "black"
+        });
+
+        LogLevelSettings.Add(LogEventLevel.Verbose, new()
+        {
+            Icon = "density_small",
+            Color = "lightsalmon",
+            ContrastColor = "black"
+        });
     }
 
     /// <summary>

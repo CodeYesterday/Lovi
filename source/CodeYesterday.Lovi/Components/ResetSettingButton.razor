@@ -1,0 +1,6 @@
+@using CodeYesterday.Lovi.Services
+
+<RadzenButton Icon="reset_settings" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+              Click="@(e => { if (Click.HasDelegate) Click.InvokeAsync(e); })"
+              @attributes="Attributes"
+              MouseEnter="e => OnShowTooltip(e)" />

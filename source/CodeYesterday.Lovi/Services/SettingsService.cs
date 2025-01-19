@@ -6,7 +6,10 @@ namespace CodeYesterday.Lovi.Services;
 internal class SettingsService : ISettingsService
 {
     private readonly IUserSettingsService<SettingsService> _userSettingsService;
+
     public SettingsModel Settings { get; } = new();
+
+    public SettingsModel DefaultSettings { get; } = new();
 
     public SettingsService(IUserSettingsService<SettingsService> userSettingsService)
     {
@@ -35,23 +38,22 @@ internal class SettingsService : ISettingsService
 
     private void LoadSettings()
     {
-        Settings.TimestampFormat = _userSettingsService.GetValue("TimestampFormat", "yyyy-MM-dd HH:mm:ss.fff");
+        Settings.TimestampFormat = _userSettingsService.GetValue("TimestampFormat", DefaultSettings.TimestampFormat);
 
-        LoadLogLevelSettings(LogEventLevel.Verbose, "density_small", "lightsalmon", "black");
-        LoadLogLevelSettings(LogEventLevel.Debug, "adb", "darkgray", "black");
-        LoadLogLevelSettings(LogEventLevel.Information, "info", "steelblue");
-        LoadLogLevelSettings(LogEventLevel.Warning, "warning", "orange", "black");
-        LoadLogLevelSettings(LogEventLevel.Error, "error", "lightsalmon", "black");
-        LoadLogLevelSettings(LogEventLevel.Fatal, "crisis_alert", "mediumvioletred", "black");
+        foreach (var level in Settings.LogLevels)
+        {
+            LoadLogLevelSettings(level);
+        }
     }
 
-    private void LoadLogLevelSettings(LogEventLevel level, string icon, string color, string? contrastColor = null)
+    private void LoadLogLevelSettings(LogEventLevel level)
     {
         var levelSettings = Settings.GetLogLevelSettings(level);
+        var defaultLevelSettings = DefaultSettings.GetLogLevelSettings(level);
 
-        levelSettings.Icon = _userSettingsService.GetValue($"{level}.Icon", icon);
-        levelSettings.Color = _userSettingsService.GetValue($"{level}.Color", color);
-        levelSettings.ContrastColor = _userSettingsService.GetValue($"{level}.ContrastColor", contrastColor ?? string.Empty);
+        levelSettings.Icon = _userSettingsService.GetValue($"{level}.Icon", defaultLevelSettings.Icon);
+        levelSettings.Color = _userSettingsService.GetValue($"{level}.Color", defaultLevelSettings.Color);
+        levelSettings.ContrastColor = _userSettingsService.GetValue($"{level}.ContrastColor", defaultLevelSettings.ContrastColor ?? string.Empty);
         if (string.IsNullOrEmpty(levelSettings.ContrastColor))
         {
             levelSettings.ContrastColor = null;

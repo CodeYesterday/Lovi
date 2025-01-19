@@ -69,4 +69,26 @@ public partial class LogLevelVisualsSettingsPage
                 }
             ];
     }
+
+    private void ResetAllLogLevels()
+    {
+        if (Settings is null) return;
+
+        foreach (var logLevel in Settings.LogLevels)
+        {
+            ResetLogLevel(logLevel);
+        }
+    }
+
+    private void ResetLogLevel(LogEventLevel logLevel)
+    {
+        if (Settings is null) return;
+
+        var logLevelSettings = Settings.GetLogLevelSettings(logLevel);
+        var logLevelDefaultSettings = DefaultSettings.GetLogLevelSettings(logLevel);
+
+        logLevelSettings.Icon = logLevelDefaultSettings.Icon;
+        logLevelSettings.Color = logLevelDefaultSettings.Color;
+        logLevelSettings.ContrastColor = logLevelDefaultSettings.ContrastColor;
+    }
 }

@@ -10,46 +10,76 @@
 else
 {
     <RadzenStack Orientation="Orientation.Vertical" Gap="0.5em">
-        <RadzenText Text="Icons/colors" TextStyle="TextStyle.H6" />
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+            <RadzenText Text="Icons/colors" TextStyle="TextStyle.H6" />
+            <ResetSettingButton Click="ResetAllLogLevels"
+                                SettingName="all icons and colors" />
+        </RadzenStack>
 
         <table>
             <tr>
-                <th>
-                    Log level
+                <th class="log-level-table-column">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                        Log level
+                    </RadzenStack>
                 </th>
-                <th>
-                    @* TODO: Add hint and link to material icons https://fonts.google.com/icons?icon.set=Material+Symbols&icon.style=Outlined&icon.size=24&icon.color=%23e8eaed *@
-                    Icon
+                <th class="log-level-table-column">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                        Icon
+                        <InfoButton Width="400px">
+                            Any material font icons can be used as icons, see:<br />
+                            <LinkButton Text="Material Symbols &amp; Icons - Google Fonts"
+                                        Uri="https://fonts.google.com/icons?icon.set=Material+Symbols" />
+                        </InfoButton>
+                    </RadzenStack>
                 </th>
-                <th>
-                    Color
+                <th class="log-level-table-column">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                        Color
+                    </RadzenStack>
                 </th>
-                <th>
-                    Contrast color
+                <th class="log-level-table-column">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                        Contrast color
+                    </RadzenStack>
                 </th>
             </tr>
 
             @foreach (var logLevel in Settings.LogLevels)
             {
                 var logLevelSettings = Settings.GetLogLevelSettings(logLevel);
+                var logLevelDefaultSettings = DefaultSettings.GetLogLevelSettings(logLevel);
 
                 <tr>
-                    <th>
-                        <RadzenLabel Text="@(logLevel.ToString())" />
-                    </th>
-                    <td>
-                        <RadzenTextBox @bind-Value="logLevelSettings.Icon" class="w-100" />
-                    </td>
-                    <td>
-                        <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
-                            <RadzenTextBox @bind-Value="logLevelSettings.Color" class="flex-fill" />
-                            <RadzenColorPicker @bind-Value="logLevelSettings.Color" ShowColors="true" ShowHSV="true" ShowRGBA="true" />
+                    <td class="log-level-table-column">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0" AlignItems="AlignItems.Center" class="w-100">
+                            <RadzenLabel Text="@(logLevel.ToString())" class="flex-fill" />
+                            <ResetSettingButton Click="@(_ => ResetLogLevel(logLevel))"
+                                                SettingName="@(logLevel.ToString())"
+                                                DefaultValue="@($"{logLevelDefaultSettings.Icon} {logLevelDefaultSettings.Color} {logLevelDefaultSettings.ContrastColor}")" />
                         </RadzenStack>
                     </td>
-                    <td>
-                        <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+                    <td class="log-level-table-column">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0" AlignItems="AlignItems.Center" class="w-100">
+                            <RadzenTextBox @bind-Value="logLevelSettings.Icon" class="flex-fill" />
+                            <ResetSettingButton Click="_ => logLevelSettings.Icon = logLevelDefaultSettings.Icon"
+                                                SettingName="@($"{logLevel} icon")" DefaultValue="@(logLevelDefaultSettings.Icon)" />
+                        </RadzenStack>
+                    </td>
+                    <td class="log-level-table-column">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0" AlignItems="AlignItems.Center" class="w-100">
+                            <RadzenTextBox @bind-Value="logLevelSettings.Color" class="flex-fill" />
+                            <RadzenColorPicker @bind-Value="logLevelSettings.Color" ShowColors="true" ShowHSV="true" ShowRGBA="true" />
+                            <ResetSettingButton Click="_ => logLevelSettings.Color = logLevelDefaultSettings.Color"
+                                                SettingName="@($"{logLevel} color")" DefaultValue="@(logLevelDefaultSettings.Color)" />
+                        </RadzenStack>
+                    </td>
+                    <td class="log-level-table-column">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0" AlignItems="AlignItems.Center" class="w-100">
                             <RadzenTextBox @bind-Value="logLevelSettings.ContrastColor" class="flex-fill" />
                             <RadzenColorPicker @bind-Value="logLevelSettings.ContrastColor" ShowColors="true" ShowHSV="true" ShowRGBA="true" />
+                            <ResetSettingButton Click="_ => logLevelSettings.ContrastColor = logLevelDefaultSettings.ContrastColor"
+                                                SettingName="@($"{logLevel} contrast color")" DefaultValue="@(logLevelDefaultSettings.ContrastColor)" />
                         </RadzenStack>
                     </td>
                 </tr>
@@ -57,9 +87,17 @@ else
         </table>
 
         <RadzenText Text="Timestamp" TextStyle="TextStyle.H6" />
-        
-        @* TODO: Add hint about format *@
-        <RadzenTextBox @bind-Value="Settings.TimestampFormat" Style="width:200px" />
+
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+            <RadzenTextBox @bind-Value="Settings.TimestampFormat" Style="width:200px" />
+            <ResetSettingButton Click="_ => Settings.TimestampFormat = DefaultSettings.TimestampFormat"
+                                SettingName="timestamp format" DefaultValue="@(DefaultSettings.TimestampFormat)" />
+            <InfoButton Width="500px">
+                Any .NET date/time format can be used, see:<br/>
+                <LinkButton Text="Custom date and time format strings - .NET | Microsoft Learn"
+                            Uri="https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings" />
+            </InfoButton>
+        </RadzenStack>
 
         <RadzenText Text="Preview" TextStyle="TextStyle.H6" />
 
@@ -100,7 +138,7 @@ else
                     </RadzenDataGridColumn>
                 </Columns>
             </RadzenDataGrid>
-            
+
             <RadzenStack Orientation="Orientation.Vertical" Gap="3px">
                 @foreach (var layer in PreviewLogLevelFilterLayers)
                 {
@@ -111,18 +149,24 @@ else
     </RadzenStack>
 }
 
+<style>
+    .log-level-table-column {
+        padding: 0 0.5em;
+    }
+</style>
+
 @code
 {
     RenderFragment LevelCheckBoxes(LogLevelFilterLayerModel layer) =>
-        @<RadzenStack Orientation="Orientation.Horizontal" Gap="0" class="rz-ml-auto">
+    @<RadzenStack Orientation="Orientation.Horizontal" Gap="0" class="rz-ml-auto">
         @if (Settings is not null)
-        {
-            foreach (var logLevel in Settings.LogLevels)
-            {
-                <RadzenCheckBox @bind-value="@layer[logLevel]" class="rz-m-0"
-                                Style="@(Settings.GetCheckBoxColorStyles(logLevel))"
-                                TriState="@layer.IsLevelTriState"/>
-            }
-        }
-        </RadzenStack>;
+    {
+    foreach (var logLevel in Settings.LogLevels)
+    {
+        <RadzenCheckBox @bind-value="@layer[logLevel]" class="rz-m-0"
+                        Style="@(Settings.GetCheckBoxColorStyles(logLevel))"
+                        TriState="@layer.IsLevelTriState" />
+    }
+    }
+    </RadzenStack>;
 }
