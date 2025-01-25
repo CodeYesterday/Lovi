@@ -15,65 +15,31 @@ public partial class LogLevelVisualsSettingsPage
     {
         base.OnInitialized();
 
-        PreviewLogItems =
-        [
-            new LogItemModel
+        LogItemModel CreatePreviewLogItem(int index, LogEventLevel level) =>
+            new()
             {
-                LogEvent = new LogEvent(DateTimeOffset.UtcNow.AddSeconds(-5), LogEventLevel.Verbose, null, new("A Verbose log event", []), []),
+                LogEvent = new LogEvent(DateTimeOffset.UtcNow.AddSeconds(index), level, null, new($"A {level} log event", []), []),
                 FileId = 0,
-                Id = 0
-            },
-            new LogItemModel
-            {
-                LogEvent = new LogEvent(DateTimeOffset.UtcNow.AddSeconds(-4), LogEventLevel.Debug, null, new("A Debug log event", []), []),
-                FileId = 0,
-                Id = 1
-            },
-            new LogItemModel
-            {
-                LogEvent = new LogEvent(DateTimeOffset.UtcNow.AddSeconds(-3), LogEventLevel.Information, null, new("A Information log event", []), []),
-                FileId = 0,
-                Id = 2
-            },
-            new LogItemModel
-            {
-                LogEvent = new LogEvent(DateTimeOffset.UtcNow.AddSeconds(-2), LogEventLevel.Warning, null, new("A Warning log event", []), []),
-                FileId = 0,
-                Id = 3
-            },
-            new LogItemModel
-            {
-                LogEvent = new LogEvent(DateTimeOffset.UtcNow.AddSeconds(-1), LogEventLevel.Error, null, new("A Error log event", []), []),
-                FileId = 0,
-                Id = 4
-            },
-            new LogItemModel
-            {
-                LogEvent = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Fatal, null, new("A Fatal log event", []), []),
-                FileId = 0,
-                Id = 5
-            }
-        ];
+                Id = index
+            };
+
+        PreviewLogItems = Settings.LogLevels.Select((l, i) => CreatePreviewLogItem(i, l)).ToArray();
+
+        LogLevelFilterLayerModel CreatePreviewLogLevelFilterLayer(LogLevelFilterModel filter, bool? showValue) =>
+            new(filter, null, null, 2)
+            { ShowLayer = showValue, ShowFatal = showValue, ShowError = showValue, ShowWarning = showValue, ShowInformation = showValue, ShowDebug = showValue, ShowVerbose = showValue };
 
         var logLevelFilter = new LogLevelFilterModel();
         PreviewLogLevelFilterLayers =
             [
-                new(logLevelFilter, null, null, 2),
-                new(logLevelFilter, null, null, 2)
-                {
-                    ShowLayer = false, ShowFatal = false, ShowError = false, ShowWarning = false, ShowInformation = false, ShowDebug = false, ShowVerbose = false
-                },
-                new(logLevelFilter, null, null, 2)
-                {
-                    ShowLayer = true, ShowFatal = true, ShowError = true, ShowWarning = true, ShowInformation = true, ShowDebug = true, ShowVerbose = true
-                }
+                CreatePreviewLogLevelFilterLayer(logLevelFilter, null),
+                CreatePreviewLogLevelFilterLayer(logLevelFilter, false),
+                CreatePreviewLogLevelFilterLayer(logLevelFilter, true)
             ];
     }
 
     private void ResetAllLogLevels()
     {
-        if (Settings is null) return;
-
         foreach (var logLevel in Settings.LogLevels)
         {
             ResetLogLevel(logLevel);
@@ -82,8 +48,6 @@ public partial class LogLevelVisualsSettingsPage
 
     private void ResetLogLevel(LogEventLevel logLevel)
     {
-        if (Settings is null) return;
-
         var logLevelSettings = Settings.GetLogLevelSettings(logLevel);
         var logLevelDefaultSettings = DefaultSettings.GetLogLevelSettings(logLevel);
 

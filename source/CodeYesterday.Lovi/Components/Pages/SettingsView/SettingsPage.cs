@@ -6,8 +6,8 @@ namespace CodeYesterday.Lovi.Components.Pages.SettingsView;
 
 public class SettingsPage : ComponentBase
 {
-    [Parameter]
-    public SettingsModel? Settings { get; set; }
+    [CascadingParameter]
+    public SettingsModel Settings { get; set; } = default!;
 
     [Inject]
     private ISettingsService SettingsService { get; set; } = default!;

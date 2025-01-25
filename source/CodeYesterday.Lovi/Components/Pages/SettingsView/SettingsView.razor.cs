@@ -113,7 +113,6 @@ public partial class SettingsView
     private RenderFragment<SettingPageModel> RenderPage => page => builder =>
     {
         builder.OpenComponent(1, page.PageType);
-        builder.AddAttribute(2, "Settings", Settings);
         builder.CloseComponent();
     };
 }
