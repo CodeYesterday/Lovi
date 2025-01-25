@@ -1,5 +1,6 @@
 ﻿using CodeYesterday.Lovi.Components;
 using CodeYesterday.Lovi.Components.Pages;
+using CodeYesterday.Lovi.Input;
 using CodeYesterday.Lovi.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
@@ -25,6 +26,7 @@ internal class ViewManager : IViewManagerInternal
     private LoviView? _lastView;
     private List<LoviPane>? _lastPanes;
     private Toolbar[]? _toolbars;
+    private KeyboardShortcut[]? _shortcuts;
     private StatusBarItem[]? _statusBarItems;
 
     public ViewId? PreviousViewId { get; private set; }
@@ -83,12 +85,22 @@ internal class ViewManager : IViewManagerInternal
 
         await view.OnOpeningAsync(cancellationToken).ConfigureAwait(true);
 
-        if (view.ToolbarContainer is not null)
+        if (view.InputHandler is not null)
         {
-            _toolbars = (await view.OnCreateToolbarsAsync(cancellationToken)).ToArray();
+            var (t, s) = await view
+                .OnCreateToolbarsAsync(cancellationToken)
+                .ConfigureAwait(ConfigureAwaitOptions.None);
+
+            _toolbars = t.ToArray();
             foreach (var toolbar in _toolbars)
             {
-                view.ToolbarContainer.AddOrUpdateToolbar(toolbar);
+                view.InputHandler.AddOrUpdateToolbar(toolbar);
+            }
+
+            _shortcuts = s.ToArray();
+            foreach (var shortcut in _shortcuts)
+            {
+                view.InputHandler.AddOrUpdateShortcut(shortcut);
             }
         }
 
@@ -196,14 +208,26 @@ internal class ViewManager : IViewManagerInternal
                 _statusBarItems = null;
             }
 
-            if (_lastView.ToolbarContainer is not null && _toolbars is not null)
+            if (_lastView.InputHandler is not null)
             {
-                foreach (var toolbar in _toolbars)
+                if (_toolbars is not null)
                 {
-                    _lastView.ToolbarContainer.RemoveToolbar(toolbar.Id);
-                }
+                    foreach (var toolbar in _toolbars)
+                    {
+                        _lastView.InputHandler.RemoveToolbar(toolbar.Id);
+                    }
 
-                _toolbars = null;
+                    _toolbars = null;
+                }
+                if (_shortcuts is not null)
+                {
+                    foreach (var shortcut in _shortcuts)
+                    {
+                        _lastView.InputHandler.RemoveShortcut(shortcut.Id);
+                    }
+
+                    _shortcuts = null;
+                }
             }
 
             _ = _lastView.OnClosedAsync(CancellationToken.None);

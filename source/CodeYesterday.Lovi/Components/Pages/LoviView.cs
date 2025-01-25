@@ -16,13 +16,13 @@ namespace CodeYesterday.Lovi.Components.Pages;
 public abstract class LoviView : LoviViewBase
 {
     /// <summary>
-    /// Gets or sets the <see cref="ToolbarContainer"/>.
+    /// Gets or sets the <see cref="InputHandler"/>.
     /// </summary>
     /// <remarks>
     /// Is set by the <see cref="MainLayout"/> as a cascading parameter.
     /// </remarks>
     [CascadingParameter]
-    public ToolbarContainer? ToolbarContainer { get; set; }
+    public InputHandler? InputHandler { get; set; }
 
     /// <summary>
     /// Gets or sets the <see cref="StatusBarModel"/>.
@@ -70,13 +70,13 @@ public abstract class LoviView : LoviViewBase
     }
 
     /// <summary>
-    /// Implement to create the toolbars.
+    /// Implement to create the toolbars and keyboard shortcuts.
     /// </summary>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>Returns an enumeration with the created toolbars.</returns>
-    public virtual Task<IEnumerable<Toolbar>> OnCreateToolbarsAsync(CancellationToken cancellationToken)
+    public virtual Task<(IEnumerable<Toolbar> toolbars, IEnumerable<KeyboardShortcut> shortcuts)> OnCreateToolbarsAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult((IEnumerable<Toolbar>)[]);
+        return Task.FromResult(((IEnumerable<Toolbar>)[], (IEnumerable<KeyboardShortcut>)[]));
     }
 
     /// <summary>

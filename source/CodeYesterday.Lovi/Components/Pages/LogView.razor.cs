@@ -14,6 +14,7 @@ public partial class LogView
     private readonly StatusBarTextItem _statusBarItem = new() { Id = "LogView.Count", OrderIndex = -1 };
 
     private RadzenDataGrid<LogItemModel> _dataGrid = default!;
+    private object? _logViewContext;
 
     [Inject]
     private NotificationService NotificationService { get; set; } = default!;
@@ -21,43 +22,90 @@ public partial class LogView
     [Inject]
     private IUserSettingsService<LogView> UserSettings { get; set; } = default!;
 
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
+
     public override Task OnOpeningAsync(CancellationToken cancellationToken)
     {
-        Debug.Assert(Model.Session is not null, "Log view is opening without session");
-        if (Model.Session is not null)
+        Debug.Assert(Session is not null, "Log view is opening without session");
+        if (Session?.DataStorage is not null)
         {
-            Model.Session.PropertiesChanged += OnPropertiesChanged;
-            Model.Session.Refreshing += OnRefreshing;
+            _logViewContext = Session.DataStorage.OpenLogDataContext();
+            Session.PropertiesChanged += OnPropertiesChanged;
+            Session.Refreshing += OnRefreshing;
         }
 
         return base.OnOpeningAsync(cancellationToken);
     }
 
-    public override Task<IEnumerable<Toolbar>> OnCreateToolbarsAsync(CancellationToken cancellationToken)
+    public override Task OnClosedAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult((IEnumerable<Toolbar>)
-        [
-            new Toolbar
-            {
-                Id = "LogView",
-                OrderIndex = 0,
-                Items =
-                [
-                    new ToolbarButton
-                    {
-                        Icon = "edit",
-                        Tooltip = "Edit session",
-                        Command = new AsyncCommand(OnEditSession)
-                    },
-                    new ToolbarButton
-                    {
-                        Icon = "refresh",
-                        Tooltip = "Refresh",
-                        Command = new AsyncCommand(OnRefreshExecute)
-                    }
-                ]
-            }
-        ]);
+        if (Session?.DataStorage is not null && _logViewContext is not null)
+        {
+            Session.DataStorage.CloseLogDataContext(_logViewContext);
+        }
+
+        return base.OnClosedAsync(cancellationToken);
+    }
+
+    public override Task<(IEnumerable<Toolbar> toolbars, IEnumerable<KeyboardShortcut> shortcuts)> OnCreateToolbarsAsync(CancellationToken cancellationToken)
+    {
+        var gotoTimestampCommand = new AsyncCommand(OnGotoTimestamp);
+        var gotoSelectedCommand = new AsyncCommand(OnGotoSelected);
+
+        return Task.FromResult((
+            (IEnumerable<Toolbar>)
+            [
+                new Toolbar
+                {
+                    Id = "LogView",
+                    OrderIndex = 0,
+                    Items =
+                    [
+                        new ToolbarButton
+                        {
+                            Icon = "edit",
+                            Tooltip = "Edit session",
+                            Command = new AsyncCommand(OnEditSession)
+                        },
+                        new ToolbarButton
+                        {
+                            Icon = "refresh",
+                            Tooltip = "Refresh",
+                            Command = new AsyncCommand(OnRefreshExecute)
+                        },
+                        new ToolbarButton
+                        {
+                            Icon = "schedule",
+                            Tooltip = "Go to timestamp (Ctrl+G)",
+                            Command = gotoTimestampCommand
+                        },
+                        new ToolbarButton
+                        {
+                            Icon = "arrow_selector_tool",
+                            Tooltip = "Go to selected (Ctrl+S)",
+                            Command = gotoSelectedCommand
+                        }
+                    ]
+                }
+            ],
+            (IEnumerable<KeyboardShortcut>)
+            [
+                new KeyboardShortcut
+                {
+                    Id = "GotoTimestamp",
+                    Command = gotoTimestampCommand,
+                    CtrlKey = true,
+                    KeyCode = "KeyG"
+                },
+                new KeyboardShortcut
+                {
+                    Id = "GotoSelected",
+                    Command = gotoSelectedCommand,
+                    CtrlKey = true,
+                    KeyCode = "KeyS"
+                }
+            ]));
     }
 
     public override Task<IEnumerable<StatusBarItem>> OnCreateStatusBarItemsAsync(CancellationToken cancellationToken)
@@ -108,11 +156,11 @@ public partial class LogView
 
     private async Task LoadData(LoadDataArgs args)
     {
-        if (Model.Session is null) return;
+        if (Session is null || _logViewContext is null) return;
 
         try
         {
-            await Model.Session.LoadDataAsync(args);
+            await Session.LoadDataAsync(args, _logViewContext);
         }
         catch (Exception ex)
         {
@@ -129,8 +177,43 @@ public partial class LogView
 
     private Task OnRefreshExecute(object? _)
     {
-        Model.Session?.Refresh();
+        Session?.Refresh();
         return Task.CompletedTask;
+    }
+
+    private async Task OnGotoTimestamp(object? parameter)
+    {
+        if (Session?.DataStorage is null || _logViewContext is null) return;
+
+        var timestamp = await GotoTimestampDialog
+            .ShowDialog(DialogService, Session.SelectedLogItem?.LogEvent.Timestamp)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+        if (!timestamp.HasValue) return;
+
+        var tuple = await Session.DataStorage
+            .GetLogItemAndIndexAsync(timestamp.Value, false, _logViewContext, CancellationToken.None)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+
+        if (tuple is null) return;
+
+        await _dataGrid.SelectRow(tuple.Value.item).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+
+        await ScrollDataGridRowIntoViewAsync(tuple.Value.index, CancellationToken.None)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+    }
+
+    private async Task OnGotoSelected(object? parameter)
+    {
+        if (Session?.DataStorage is null || _logViewContext is null || Session?.SelectedLogItem is null) return;
+
+        var tuple = await Session.DataStorage
+            .GetLogItemAndIndexAsync(Session.SelectedLogItem, true, _logViewContext, CancellationToken.None)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+
+        if (tuple is null) return;
+
+        await ScrollDataGridRowIntoViewAsync(tuple.Value.index, CancellationToken.None)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
     }
 
     private static RenderFragment<LogPropertyModel> RenderPropertyColumn => property => builder =>

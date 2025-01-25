@@ -41,38 +41,40 @@ public partial class SettingsView
         Settings = SettingsService.Settings;
     }
 
-    public override Task<IEnumerable<Toolbar>> OnCreateToolbarsAsync(CancellationToken cancellationToken)
+    public override Task<(IEnumerable<Toolbar> toolbars, IEnumerable<KeyboardShortcut> shortcuts)> OnCreateToolbarsAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult((IEnumerable<Toolbar>)
-        [
-            new Toolbar
-            {
-                Id = "Settings",
-                OrderIndex = -2,
-                AddGap = true,
-                Items =
-                [
-                    new ToolbarButton
-                    {
-                        Title = "Save",
-                        Icon = "check_circle",
-                        ButtonVariant = Variant.Flat,
-                        ButtonStyle = ButtonStyle.Success,
-                        Tooltip = "Save and close settings",
-                        Command = new AsyncCommand(OnSaveAndCloseAsync)
-                    },
-                    new ToolbarButton
-                    {
-                        Title = "Cancel",
-                        Icon = "cancel",
-                        ButtonVariant = Variant.Flat,
-                        ButtonStyle = ButtonStyle.Base,
-                        Tooltip = "Discard and close settings",
-                        Command = new AsyncCommand(OnDiscardAndCloseAsync)
-                    }
-                ]
-            }
-        ]);
+        return Task.FromResult((
+            (IEnumerable<Toolbar>)
+            [
+                new Toolbar
+                {
+                    Id = "Settings",
+                    OrderIndex = -2,
+                    AddGap = true,
+                    Items =
+                    [
+                        new ToolbarButton
+                        {
+                            Title = "Save",
+                            Icon = "check_circle",
+                            ButtonVariant = Variant.Flat,
+                            ButtonStyle = ButtonStyle.Success,
+                            Tooltip = "Save and close settings",
+                            Command = new AsyncCommand(OnSaveAndCloseAsync)
+                        },
+                        new ToolbarButton
+                        {
+                            Title = "Cancel",
+                            Icon = "cancel",
+                            ButtonVariant = Variant.Flat,
+                            ButtonStyle = ButtonStyle.Base,
+                            Tooltip = "Discard and close settings",
+                            Command = new AsyncCommand(OnDiscardAndCloseAsync)
+                        }
+                    ]
+                }
+            ],
+            (IEnumerable<KeyboardShortcut>)[]));
     }
 
     private void ShowPage(SettingPageModel page)

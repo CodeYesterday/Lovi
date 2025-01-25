@@ -27,7 +27,7 @@ public partial class PaneLayout : IPaneLayout
     private double CenterPaneHeight { get; set; } = 60d;
 
     [CascadingParameter]
-    public ToolbarContainer? ToolbarContainer { get; set; }
+    public InputHandler? ToolbarContainer { get; set; }
 
     public IUserSettingsService? PaneUserSettings { get; set; }
 

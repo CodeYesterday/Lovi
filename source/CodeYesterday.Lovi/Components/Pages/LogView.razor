@@ -17,6 +17,7 @@ else
     <RadzenStack Orientation="Orientation.Vertical" class="h-100" Gap="0">
         @* Logs data grid *@
         <RadzenDataGrid @ref="_dataGrid" Class="flex-fill w-100"
+                        KeyProperty="@nameof(LogItemModel.Id)"
                         TItem="LogItemModel" Data="@Session.PagedItems" Count="@Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
                         AllowColumnReorder="true" AllowColumnResize="true"
                         AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"

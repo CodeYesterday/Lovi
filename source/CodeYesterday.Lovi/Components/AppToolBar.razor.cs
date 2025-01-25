@@ -6,5 +6,5 @@ namespace CodeYesterday.Lovi.Components;
 public partial class AppToolbar
 {
     [CascadingParameter]
-    public ToolbarContainer ToolbarContainer { get; set; } = default!;
+    public InputHandler ToolbarContainer { get; set; } = default!;
 }

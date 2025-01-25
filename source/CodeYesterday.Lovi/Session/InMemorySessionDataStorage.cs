@@ -10,8 +10,7 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
 {
     private readonly List<LogItemModel> _data = new();
     private readonly ConcurrentDictionary<string, LogPropertyModel> _properties = new();
-    private int _filteredCount = -1;
-    private string _lastFilter = string.Empty;
+    private readonly List<InMemoryStorageLogDataContext> _logDataContexts = new();
 
     public int FullLogEventCount => _data.Count;
 
@@ -202,15 +201,37 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
         return Task.CompletedTask;
     }
 
+    public object OpenLogDataContext()
+    {
+        var inMemoryContext = new InMemoryStorageLogDataContext();
+        lock (_logDataContexts)
+        {
+            _logDataContexts.Add(inMemoryContext);
+        }
+        return inMemoryContext;
+    }
+
+    public void CloseLogDataContext(object context)
+    {
+        var inMemoryContext = context as InMemoryStorageLogDataContext ?? throw new ArgumentException("Invalid log data context", nameof(context));
+
+        lock (_logDataContexts)
+        {
+            _logDataContexts.Remove(inMemoryContext);
+        }
+    }
+
     public async Task<(IQueryable<LogItemModel>, int)> GetDataAsync(int? skip, int? take,
-        string orderBy, string filter,
+        string orderBy, string filter, object context,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        IQueryable<LogItemModel> query = string.IsNullOrEmpty(orderBy) ?
-            _data.OrderBy(item => item.LogEvent.Timestamp).AsQueryable() :
-            _data.AsQueryable().OrderBy(orderBy);
+        var inMemoryContext = context as InMemoryStorageLogDataContext ?? throw new ArgumentException("Invalid log data context", nameof(context));
+
+        inMemoryContext.OrderBy = orderBy;
+
+        var query = GetDataAsOrderedQueryable(inMemoryContext, false);
 
         int count;
         if (string.IsNullOrEmpty(filter))
@@ -220,17 +241,17 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
         else
         {
             query = query.Where(filter);
-            if (_filteredCount < 0 || !string.Equals(filter, _lastFilter, StringComparison.Ordinal))
+            if (inMemoryContext.FilteredCount < 0 || !string.Equals(filter, inMemoryContext.LastFilter, StringComparison.Ordinal))
             {
                 count = await Task.FromResult(query.Count());
             }
             else
             {
-                count = _filteredCount;
+                count = inMemoryContext.FilteredCount;
             }
         }
-        _lastFilter = filter;
-        _filteredCount = count;
+        inMemoryContext.LastFilter = filter;
+        inMemoryContext.FilteredCount = count;
 
         if (skip is not null)
         {
@@ -241,12 +262,81 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
             query = query.Take(take.Value);
         }
 
-        return (query, _filteredCount);
+        return (query, inMemoryContext.FilteredCount);
+    }
+
+    public async Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(LogItemModel item, bool exact, object context, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var inMemoryContext = context as InMemoryStorageLogDataContext ?? throw new ArgumentException("Invalid log data context", nameof(context));
+
+        if (inMemoryContext.FilteredCount == 0) return null;
+
+        var data = GetDataAsOrderedQueryable(inMemoryContext, true);
+
+        var tuple = GetItemAndIndexOf(data, x => x.Id == item.Id);
+
+        if (tuple is null || exact) return tuple;
+
+        return await GetLogItemAndIndexAsync(item.LogEvent.Timestamp, false, context, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+    }
+
+    public Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(DateTimeOffset timestamp, bool exact, object context, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var inMemoryContext = context as InMemoryStorageLogDataContext ?? throw new ArgumentException("Invalid log data context", nameof(context));
+
+        if (inMemoryContext.FilteredCount == 0) return Task.FromResult<(LogItemModel item, int index)?>(null);
+
+        var data = GetDataAsOrderedQueryable(inMemoryContext, true);
+
+        if (exact)
+        {
+            return Task.FromResult(GetItemAndIndexOf(data, x => x.LogEvent.Timestamp == timestamp));
+        }
+
+        var e = data as IEnumerable<LogItemModel>;
+        return Task.FromResult<(LogItemModel item, int index)?>(e
+            .Select((item, index) => (item, index))
+            .MinBy(x => Math.Abs((x.item.LogEvent.Timestamp - timestamp).Ticks)));
+    }
+
+    public Task<LogItemModel?> GetLogItemByIndexAsync(int index, object context, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var inMemoryContext = context as InMemoryStorageLogDataContext ?? throw new ArgumentException("Invalid log data context", nameof(context));
+
+        if (inMemoryContext.FilteredCount == 0) return Task.FromResult<LogItemModel?>(null);
+
+        var data = GetDataAsOrderedQueryable(inMemoryContext, true);
+
+        return Task.FromResult(data.Skip(index).FirstOrDefault());
+    }
+
+    private (LogItemModel item, int index)? GetItemAndIndexOf(IEnumerable<LogItemModel> items, Predicate<LogItemModel> predicate)
+    {
+        return items
+            .Select((item, index) => (item, index))
+            .FirstOrDefault(x => predicate(x.item));
+    }
+
+    private IQueryable<LogItemModel> GetDataAsOrderedQueryable(InMemoryStorageLogDataContext context, bool filtered)
+    {
+        var data = string.IsNullOrEmpty(context.OrderBy) ?
+            _data.OrderBy(item => item.LogEvent.Timestamp).AsQueryable() :
+            _data.AsQueryable().OrderBy(context.OrderBy);
+
+        if (!filtered || string.IsNullOrEmpty(context.LastFilter)) return data;
+
+        return data.Where(context.LastFilter);
     }
 
     private bool AddInternal(LogEvent evt, int fileId)
     {
-        _filteredCount = -1;
+        ResetAllContextFilteredCount();
 
         var logItemModel = new LogItemModel()
         {
@@ -276,6 +366,17 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
         }
 
         return changed;
+    }
+
+    private void ResetAllContextFilteredCount()
+    {
+        lock (_logDataContexts)
+        {
+            foreach (var inMemoryContext in _logDataContexts)
+            {
+                inMemoryContext.FilteredCount = -1;
+            }
+        }
     }
 
     private void OnPropertiesChanged()

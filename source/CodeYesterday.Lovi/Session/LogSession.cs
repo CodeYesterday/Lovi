@@ -133,7 +133,7 @@ public class LogSession : IAsyncDisposable
         return LogSessionConfigStorage.WriteSessionConfigAsync(SessionConfig, SessionDirectory, DataDirectory, cancellationToken);
     }
 
-    public async Task LoadDataAsync(LoadDataArgs args)
+    public async Task LoadDataAsync(LoadDataArgs args, object context)
     {
         CheckInitialized();
 
@@ -145,19 +145,16 @@ public class LogSession : IAsyncDisposable
         var filters = new List<string>();
         if (!string.IsNullOrEmpty(logLevelFilter))
         {
-            //Debug.Print($"LogLevelFilter: {logLevelFilter}");
             filters.Add(logLevelFilter);
         }
 
         if (!string.IsNullOrEmpty(AdvancedFilterExpression))
         {
-            //Debug.Print($"AdvancedFilter: {AdvancedFilterExpression}");
             filters.Add(AdvancedFilterExpression);
         }
 
         if (!string.IsNullOrEmpty(args.Filter))
         {
-            //Debug.Print($"DataGridFilter: {args.Filter}");
             filters.Add(args.Filter);
         }
 
@@ -167,11 +164,10 @@ public class LogSession : IAsyncDisposable
             1 => filters[0],
             _ => string.Join("and", filters.Select(f => $"({f})"))
         };
-        //Debug.Print($"CombinedFilter: {filter}");
 
         // Get the filtered items:
         var (data, count) = await DataStorage.GetDataAsync(args.Skip, args.Top,
-            args.OrderBy, filter, CancellationToken.None).ConfigureAwait(true);
+            args.OrderBy, filter, context, CancellationToken.None).ConfigureAwait(true);
 
         // Update the data:
         FilteredLogEventCount = count;

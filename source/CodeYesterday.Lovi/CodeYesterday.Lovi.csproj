@@ -61,6 +61,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Components\Pages\LogView.razor.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="licenses.json" />
   </ItemGroup>
 

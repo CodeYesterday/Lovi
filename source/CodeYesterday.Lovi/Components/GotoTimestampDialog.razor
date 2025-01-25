@@ -1,0 +1,11 @@
+<RadzenStack Orientation="Orientation.Vertical">
+    <RadzenDatePicker Inline="true" ShowTime="true" ShowSeconds="true" ShowTimeOkButton="false"
+                      @bind-Value="Timestamp" Kind="DateTimeKind.Utc" />
+    
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Right">
+        <RadzenButton Text="Ok" Icon="check" ButtonStyle="ButtonStyle.Success"
+                      Click="OnOk"/>
+        <RadzenButton Text="Cancel" Icon="cancel" ButtonStyle="ButtonStyle.Base"
+                      Click="OnCancel"/>
+    </RadzenStack>
+</RadzenStack>

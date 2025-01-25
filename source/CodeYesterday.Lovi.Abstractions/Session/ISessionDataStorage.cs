@@ -100,14 +100,36 @@ public interface ISessionDataStorage
     }
 
     /// <summary>
+    /// Creates a new log data context.
+    /// </summary>
+    /// <returns>Return the new context.</returns>
+    /// <remarks>
+    /// The context MUST be closed with <see cref="CloseLogDataContext"/>.
+    /// </remarks>
+    object OpenLogDataContext();
+
+    /// <summary>
+    /// Closes a context opened with <see cref="OpenLogDataContext"/>.
+    /// </summary>
+    /// <param name="context">The context to close.</param>
+    void CloseLogDataContext(object context);
+
+    /// <summary>
     /// Returns a filtered subset of the log items and the count of filtered items.
     /// </summary>
     /// <param name="skip">Number of items to skip.</param>
     /// <param name="take">Number of items to take.</param>
     /// <param name="orderBy">Ordering instructions.</param>
     /// <param name="filter">The filter expression.</param>
+    /// <param name="context">The context of the current view.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to cancel the operation.</param>
     /// <returns>Returns the subset of log items and the total count of items with the given filter applied.</returns>
     Task<(IQueryable<LogItemModel>, int)> GetDataAsync(int? skip, int? take, string orderBy, string filter,
-        CancellationToken cancellationToken);
+        object context, CancellationToken cancellationToken);
+
+    Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(LogItemModel model, bool exact, object context, CancellationToken cancellationToken);
+
+    Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(DateTimeOffset timestamp, bool exact, object context, CancellationToken cancellationToken);
+
+    Task<LogItemModel?> GetLogItemByIndexAsync(int index, object context, CancellationToken cancellationToken);
 }
