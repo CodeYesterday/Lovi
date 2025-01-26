@@ -23,7 +23,7 @@ public partial class LogLevelVisualsSettingsPage
                 Id = index
             };
 
-        PreviewLogItems = Settings.LogLevels.Select((l, i) => CreatePreviewLogItem(i, l)).ToArray();
+        PreviewLogItems = SettingsModel.LogLevels.Select((l, i) => CreatePreviewLogItem(i, l)).ToArray();
 
         LogLevelFilterLayerModel CreatePreviewLogLevelFilterLayer(LogLevelFilterModel filter, bool? showValue) =>
             new(filter, null, null, 2)
@@ -40,7 +40,7 @@ public partial class LogLevelVisualsSettingsPage
 
     private void ResetAllLogLevels()
     {
-        foreach (var logLevel in Settings.LogLevels)
+        foreach (var logLevel in SettingsModel.LogLevels)
         {
             ResetLogLevel(logLevel);
         }

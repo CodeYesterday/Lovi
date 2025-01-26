@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:blazorweb="clr-namespace:Microsoft.AspNetCore.Components.Web;assembly=Microsoft.AspNetCore.Components.Web"
              xmlns:local="clr-namespace:CodeYesterday.Lovi"
              x:Class="CodeYesterday.Lovi.MainPage">
 
-    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
-        <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type local:Components.Routes}" />
-        </BlazorWebView.RootComponents>
-    </BlazorWebView>
+  <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+    <BlazorWebView.RootComponents>
+      <RootComponent Selector="#app" ComponentType="{x:Type local:Components.Routes}" />
+      <RootComponent ComponentType="{x:Type blazorweb:HeadOutlet}" Selector="#headoutlet::after" />
+    </BlazorWebView.RootComponents>
+  </BlazorWebView>
 
 </ContentPage>

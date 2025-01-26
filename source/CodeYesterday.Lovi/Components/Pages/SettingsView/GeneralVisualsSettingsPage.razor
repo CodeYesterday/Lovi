@@ -1,0 +1,16 @@
+@inherits SettingsPage
+
+<RadzenStack Orientation="Orientation.Vertical" Gap="0.5em">
+
+    <RadzenText Text="Theme" TextStyle="TextStyle.H6" />
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+        <RadzenDropDown Name="ThemeDropDown" TValue="string" Style="min-width:200px"
+                        Value="@ThemeService.Theme" ValueChanged="@ChangeTheme" 
+                        Data="@Themes.Free" 
+                        TextProperty=@nameof(Theme.Text) ValueProperty=@nameof(Theme.Value)/>
+
+        <ResetSettingButton Click="_ => ChangeTheme(DefaultSettings.Theme)"
+                            SettingName="theme" DefaultValue="@(Themes.Free.FirstOrDefault(t => string.Equals(t.Value, DefaultSettings.Theme, StringComparison.OrdinalIgnoreCase))?.Text ?? DefaultSettings.Theme)" />
+    </RadzenStack>
+</RadzenStack>

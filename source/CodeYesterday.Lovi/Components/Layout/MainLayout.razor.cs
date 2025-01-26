@@ -25,10 +25,13 @@ public partial class MainLayout : IAsyncDisposable
     private DialogService DialogService { get; set; } = default!;
 
     [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
     private IViewManagerInternal ViewManagerInternal { get; set; } = default!;
 
     [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
+    private ISettingsService SettingsService { get; set; } = default!;
 
     [Inject]
     private AppModel Model { get; set; } = default!;

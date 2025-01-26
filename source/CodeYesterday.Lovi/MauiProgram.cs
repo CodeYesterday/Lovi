@@ -27,7 +27,6 @@ namespace CodeYesterday.Lovi
                 });
 
             builder.Services.AddMauiBlazorWebView();
-
             builder.Services.AddRadzenComponents();
 
             builder.Services.AddTransient(typeof(IUserSettingsService<>), typeof(MauiUserSettingsService<>));

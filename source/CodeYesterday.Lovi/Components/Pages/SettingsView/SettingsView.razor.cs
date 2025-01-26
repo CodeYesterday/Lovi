@@ -18,6 +18,11 @@ public partial class SettingsView
             [
                 new()
                 {
+                    Title = "General",
+                    PageType = typeof(GeneralVisualsSettingsPage)
+                },
+                new()
+                {
                     Title = "Log levels",
                     PageType = typeof(LogLevelVisualsSettingsPage)
                 }

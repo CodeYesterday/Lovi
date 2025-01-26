@@ -11,6 +11,10 @@ public class ToolbarCheckBox : ToolbarItem
     private ButtonStyle _isCheckedButtonStyle = ButtonStyle.Secondary;
     private string? _isCheckedTooltip;
 
+    public ButtonSize? ButtonSize { get; init; }
+
+    public Variant? ButtonVariant { get; init; }
+
     public string? IsCheckedIcon
     {
         get => _isCheckedIcon;

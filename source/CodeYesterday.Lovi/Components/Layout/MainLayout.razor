@@ -1,25 +1,29 @@
 ﻿@inherits LayoutComponentBase
 
-<HeadContent>
-    <RadzenTheme Theme="dark" />
-</HeadContent>
+@if (!string.IsNullOrEmpty(SettingsService.Settings.Theme))
+{
+    <HeadContent>
+        @* <RadzenTheme Theme="dark" /> *@
+        <link rel="stylesheet" href="@($"_content/Radzen.Blazor/css/{SettingsService.Settings.Theme}.css")" />
+    </HeadContent>
 
-<RadzenComponents />
+    <RadzenComponents/>
 
-<CascadingValue Value="@InputHandler">
-<CascadingValue Value="@StatusBar">
-    <RadzenLayout>
-        <RadzenHeader style="--rz-header-min-height: 0px;">
-            <AppToolbar/>
-        </RadzenHeader>
+    <CascadingValue Value="@InputHandler">
+        <CascadingValue Value="@StatusBar">
+            <RadzenLayout>
+                <RadzenHeader style="--rz-header-min-height: 0px;">
+                    <AppToolbar/>
+                </RadzenHeader>
 
-        <RadzenBody class="h-100 no-scroll-y rz-p-0">
-            @Body
-        </RadzenBody>
+                <RadzenBody class="h-100 no-scroll-y rz-p-0">
+                    @Body
+                </RadzenBody>
 
-        <RadzenFooter class="rz-p-2">
-            <StatusBar/>
-        </RadzenFooter>
-    </RadzenLayout>
-</CascadingValue>
-</CascadingValue>
+                <RadzenFooter class="rz-p-2">
+                    <StatusBar/>
+                </RadzenFooter>
+            </RadzenLayout>
+        </CascadingValue>
+    </CascadingValue>
+}

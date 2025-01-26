@@ -58,6 +58,19 @@ internal class ViewManager : IViewManagerInternal
         return true;
     }
 
+    public Task Refresh(CancellationToken cancellationToken)
+    {
+        CheckInitialized();
+
+        // reset the navigation manager, since we will get a new one.
+        var navigationManager = _navigationManager;
+
+        var uri = "/" + navigationManager.ToBaseRelativePath(navigationManager.Uri);
+        navigationManager.NavigateTo(uri, true);
+
+        return Task.CompletedTask;
+    }
+
     public void SetNavigationManager(NavigationManager navigationManager)
     {
         if (_navigationManager is not null) return;

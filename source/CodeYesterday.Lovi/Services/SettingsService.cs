@@ -1,4 +1,5 @@
 ﻿using CodeYesterday.Lovi.Models;
+using Radzen;
 using Serilog.Events;
 
 namespace CodeYesterday.Lovi.Services;
@@ -26,9 +27,10 @@ internal class SettingsService : ISettingsService
 
     public Task SaveSettingsAsync(CancellationToken cancellationToken)
     {
+        _userSettingsService.SetValue("Theme", Settings.Theme);
         _userSettingsService.SetValue("TimestampFormat", Settings.TimestampFormat);
 
-        foreach (var level in Settings.LogLevels)
+        foreach (var level in SettingsModel.LogLevels)
         {
             SaveLogLevelSettings(level);
         }
@@ -38,9 +40,16 @@ internal class SettingsService : ISettingsService
 
     private void LoadSettings()
     {
+        Settings.Theme = _userSettingsService.GetValue("Theme", DefaultSettings.Theme);
+        // If theme does not exist fall back to default.
+        if (!Themes.Free.Any(t => string.Equals(t.Value, Settings.Theme)))
+        {
+            Settings.Theme = DefaultSettings.Theme;
+        }
+
         Settings.TimestampFormat = _userSettingsService.GetValue("TimestampFormat", DefaultSettings.TimestampFormat);
 
-        foreach (var level in Settings.LogLevels)
+        foreach (var level in SettingsModel.LogLevels)
         {
             LoadLogLevelSettings(level);
         }

@@ -1,0 +1,13 @@
+@if (Button is not null)
+{
+    <RadzenButton Text="@Button.Title"
+                  Icon="@Button.Icon"
+                  Visible="@Button.IsVisible"
+                  Disabled="@(!Button.Command.CanExecute(Button.CommandParameter))"
+                  Variant="@(Button.ButtonVariant ?? DefaultButtonVariant)"
+                  ButtonStyle="@(Button.ButtonStyle ?? DefaultButtonStyle)"
+                  Size="@(Button.ButtonSize ?? DefaultButtonSize)"
+                  Click="@(() => Button.Command.Execute(Button.CommandParameter))"
+                  MouseEnter="e => OnShowTooltip(e, Button.Tooltip)"
+                  @attributes="Attributes" />
+}

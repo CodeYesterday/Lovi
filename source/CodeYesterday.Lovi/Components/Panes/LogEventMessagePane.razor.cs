@@ -1,5 +1,8 @@
-﻿using CodeYesterday.Lovi.Models;
+﻿using CodeYesterday.Lovi.Input;
+using CodeYesterday.Lovi.Models;
+using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -12,16 +15,87 @@ public partial class LogEventMessagePane
     [Parameter]
     public string? CssClass { get; set; }
 
+    [Inject]
+    private IUserSettingsService<LogEventMessagePane> UserSettings { get; set; } = default!;
+
     private LogItemModel? SelectedItem => Session?.SelectedLogItem;
+
+    private ToolbarButton CopyMessageButton { get; }
+
+    private ToolbarButton CopyExceptionButton { get; }
+
+    private ToolbarCheckBox WrapMessageCheckBox { get; }
+
+    private ToolbarCheckBox WrapExceptionCheckBox { get; }
+
+    private double MessagePaneWidth { get; set; } = 50d;
+
+    private bool ExceptionPaneVisible { get; set; } = true;
+
+    public LogEventMessagePane()
+    {
+        CopyMessageButton = new()
+        {
+            Icon = "content_copy",
+            Tooltip = "Copy message to clipboard",
+            ButtonSize = ButtonSize.Small,
+            Command = new AsyncCommand(OnCopyMessage, OnCopyMessageCanExecute)
+        };
+        CopyExceptionButton = new()
+        {
+            Icon = "content_copy",
+            Tooltip = "Copy exception to clipboard",
+            ButtonSize = ButtonSize.Small,
+            Command = new AsyncCommand(OnCopyException, OnCopyExceptionCanExecute)
+        };
+
+        WrapMessageCheckBox = new()
+        {
+            Icon = "wrap_text",
+            Tooltip = "Wrap message text",
+            ButtonSize = ButtonSize.Small,
+            IsChecked = true
+        };
+        WrapMessageCheckBox.IsCheckedChanged += WrapCheckBoxOnIsCheckedChanged;
+        WrapExceptionCheckBox = new()
+        {
+            Icon = "wrap_text",
+            Tooltip = "Wrap exception text",
+            ButtonSize = ButtonSize.Small,
+            IsChecked = true
+        };
+        WrapExceptionCheckBox.IsCheckedChanged += WrapCheckBoxOnIsCheckedChanged;
+    }
+
+    private void WrapCheckBoxOnIsCheckedChanged(object? sender, ChangedEventArgs<bool> e)
+    {
+        UserSettings.SetValue("WrapMessage", WrapMessageCheckBox.IsChecked);
+        UserSettings.SetValue("WrapException", WrapExceptionCheckBox.IsChecked);
+
+        InvokeAsync(StateHasChanged);
+    }
 
     public override async Task OnOpeningAsync(CancellationToken cancellationToken)
     {
-        await base.OnOpeningAsync(cancellationToken);
+        await base.OnOpeningAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
 
         if (Session is not null)
         {
             Session.SelectedLogItemModelChanged += OnSelectedLogItemModelChanged;
         }
+    }
+
+    public override async Task OnOpenedAsync(CancellationToken cancellationToken)
+    {
+        WrapMessageCheckBox.IsChecked = UserSettings.GetValue("WrapMessage", true);
+        WrapExceptionCheckBox.IsChecked = UserSettings.GetValue("WrapException", true);
+
+        MessagePaneWidth = UserSettings.GetValue("MessagePaneWidth", 50d);
+        ExceptionPaneVisible = UserSettings.GetValue("ExceptionPaneVisible", true);
+
+        StateHasChanged();
+
+        await base.OnOpenedAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
     }
 
     public override Task OnClosingAsync(CancellationToken cancellationToken)
@@ -37,22 +111,35 @@ public partial class LogEventMessagePane
     private void OnSelectedLogItemModelChanged(object? sender, ChangedEventArgs<LogItemModel> e)
     {
         InvokeAsync(StateHasChanged);
+
+        ((AsyncCommand)CopyMessageButton.Command).NotifyCanExecuteChanged();
+        ((AsyncCommand)CopyExceptionButton.Command).NotifyCanExecuteChanged();
     }
 
-    private async Task CopyMessage()
+    private async Task OnCopyMessage(object? parameter)
     {
-        if (SelectedItem != null)
+        if (SelectedItem is not null)
         {
-            await Clipboard.SetTextAsync(SelectedItem.LogEvent.RenderMessage());
+            await Clipboard.SetTextAsync(SelectedItem.LogEvent.RenderMessage()).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
         }
     }
 
-    private async Task CopyException()
+    private bool OnCopyMessageCanExecute(object? parameter)
     {
-        if (SelectedItem?.LogEvent.Exception != null)
+        return SelectedItem is not null;
+    }
+
+    private async Task OnCopyException(object? parameter)
+    {
+        if (SelectedItem?.LogEvent.Exception is not null)
         {
-            await Clipboard.SetTextAsync(SelectedItem.LogEvent.Exception.ToString());
+            await Clipboard.SetTextAsync(SelectedItem.LogEvent.Exception.ToString()).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
         }
+    }
+
+    private bool OnCopyExceptionCanExecute(object? parameter)
+    {
+        return SelectedItem?.LogEvent.Exception is not null;
     }
 
     private static RenderFragment<LogItemModel> RenderedException => logItem => builder =>
@@ -103,7 +190,7 @@ public partial class LogEventMessagePane
         int lastEnd = 0;
         for (int index = 0; index < match.Groups.Count; ++index)
         {
-            var group = match.Groups[index]!;
+            var group = match.Groups[index];
             if (group is Match) continue;
 
             if (group.Index > lastEnd)
@@ -119,6 +206,30 @@ public partial class LogEventMessagePane
         if (text.Length > lastEnd)
         {
             sb.Append(text.Substring(lastEnd));
+        }
+    }
+
+    private void OnSplitterPaneExpand(RadzenSplitterEventArgs args)
+    {
+        if (args.PaneIndex == 1)
+        {
+            UserSettings.SetValue("ExceptionPaneVisible", true);
+        }
+    }
+
+    private void OnSplitterPaneCollapse(RadzenSplitterEventArgs args)
+    {
+        if (args.PaneIndex == 1)
+        {
+            UserSettings.SetValue("ExceptionPaneVisible", false);
+        }
+    }
+
+    private void OnSplitterPaneResize(RadzenSplitterResizeEventArgs args)
+    {
+        if (args.PaneIndex == 0)
+        {
+            UserSettings.SetValue("MessagePaneWidth", args.NewSize);
         }
     }
 }

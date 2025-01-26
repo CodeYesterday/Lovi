@@ -12,5 +12,7 @@ public class ToolbarButton : ToolbarItem
 
     public ButtonStyle? ButtonStyle { get; init; }
 
+    public ButtonSize? ButtonSize { get; init; }
+
     public Variant? ButtonVariant { get; init; }
 }

@@ -1,0 +1,13 @@
+@if (CheckBox is not null)
+{
+    <RadzenButton Text="@CheckBox.Title"
+                  Icon="@(CheckBox.IsChecked && !string.IsNullOrEmpty(CheckBox.IsCheckedIcon) ? CheckBox.IsCheckedIcon : CheckBox.Icon)"
+                  Visible="@CheckBox.IsVisible"
+                  Disabled="@CheckBox.IsDisabled"
+                  ButtonStyle="@(CheckBox.IsChecked ? CheckBox.IsCheckedButtonStyle : ToolbarButtonControl.DefaultButtonStyle)"
+                  Variant="@(CheckBox.ButtonVariant ?? ToolbarButtonControl.DefaultButtonVariant)"
+                  Size="@(CheckBox.ButtonSize ?? ToolbarButtonControl.DefaultButtonSize)"
+                  Click="@(() => CheckBox.IsChecked = !CheckBox.IsChecked)"
+                  MouseEnter="e => OnShowTooltip(e, CheckBox.IsChecked ? CheckBox.IsCheckedTooltip ?? CheckBox.Tooltip : CheckBox.Tooltip)"
+                  @attributes="Attributes" />
+}

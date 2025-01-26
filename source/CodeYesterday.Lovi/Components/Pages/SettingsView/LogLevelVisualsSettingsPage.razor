@@ -46,7 +46,7 @@
         </RadzenTableHeader>
 
         <RadzenTableBody>
-            @foreach (var logLevel in Settings.LogLevels)
+            @foreach (var logLevel in SettingsModel.LogLevels)
             {
                 var logLevelSettings = Settings.GetLogLevelSettings(logLevel);
                 var logLevelDefaultSettings = DefaultSettings.GetLogLevelSettings(logLevel);
@@ -157,7 +157,7 @@
 {
     RenderFragment LevelCheckBoxes(LogLevelFilterLayerModel layer) =>
     @<RadzenStack Orientation="Orientation.Horizontal" Gap="0" class="rz-ml-auto">
-        @foreach (var logLevel in Settings.LogLevels)
+        @foreach (var logLevel in SettingsModel.LogLevels)
         {
             <RadzenCheckBox @bind-value="@layer[logLevel]" class="rz-m-0"
                             Style="@(Settings.GetCheckBoxColorStyles(logLevel))"

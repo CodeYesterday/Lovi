@@ -8,6 +8,22 @@ namespace CodeYesterday.Lovi.Models;
 /// </summary>
 public class SettingsModel
 {
+
+    /// <summary>
+    /// Gets the list of available themes.
+    /// </summary>
+    public static string[] Themes { get; } = ["default", "dark", "material", "material-dark", "standard", "standard-dark", "humanistic", "humanistic-dark"];
+
+    /// <summary>
+    /// Gets an array with all log levels sorted from <see cref="LogEventLevel.Fatal"/> to <see cref="LogEventLevel.Verbose"/>.
+    /// </summary>
+    public static LogEventLevel[] LogLevels { get; }
+
+    static SettingsModel()
+    {
+        LogLevels = Enum.GetValues<LogEventLevel>().OrderByDescending(l => (int)l).ToArray();
+    }
+
     /// <summary>
     /// The model for log level settings.
     /// </summary>
@@ -28,11 +44,6 @@ public class SettingsModel
         /// </summary>
         public string? ContrastColor { get; set; }
     }
-
-    /// <summary>
-    /// Gets an array with all log levels sorted from <see cref="LogEventLevel.Fatal"/> to <see cref="LogEventLevel.Verbose"/>.
-    /// </summary>
-    public LogEventLevel[] LogLevels { get; }
 
     /// <summary>
     /// Gets the dictionary with all log level settings.
@@ -59,12 +70,15 @@ public class SettingsModel
     public string TimestampFormatString => $"{{0:{TimestampFormat}}}";
 
     /// <summary>
+    /// Gets or sets the theme.
+    /// </summary>
+    public string Theme { get; set; } = "dark";
+
+    /// <summary>
     /// Creates a new instance of the settings model with default values.
     /// </summary>
     public SettingsModel()
     {
-        LogLevels = Enum.GetValues<LogEventLevel>().OrderByDescending(l => (int)l).ToArray();
-
         LogLevelSettings.Add(LogEventLevel.Fatal, new()
         {
             Icon = "crisis_alert",

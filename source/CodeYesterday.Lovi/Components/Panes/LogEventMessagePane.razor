@@ -1,3 +1,4 @@
+@using System.Globalization
 @using CodeYesterday.Lovi.Helper
 
 @inherits LoviPane
@@ -10,37 +11,38 @@ else
 {
     var logItemSettings = SettingsService.Settings.GetLogLevelSettings(SelectedItem.LogEvent.Level);
 
-    <RadzenSplitter Orientation="Orientation.Horizontal" class="flex-fill">
-        <RadzenSplitterPane Size="50%" Collapsible="false">
+    <RadzenSplitter Orientation="Orientation.Horizontal" class="flex-fill" Expand="OnSplitterPaneExpand" Collapse="OnSplitterPaneCollapse" Resize="OnSplitterPaneResize">
+        <RadzenSplitterPane Size="@(MessagePaneWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="false">
             <RadzenStack Orientation="Orientation.Vertical" class="h-100 w-100 no-scroll-x no-scroll-y" Gap="0">
-                <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="4px">
+                <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="0.5em" AlignItems="AlignItems.Center">
                     <RadzenIcon Icon="@logItemSettings.Icon" IconColor="@logItemSettings.Color" />
 
-                    <RadzenText Text="@(SelectedItem.LogEvent.Timestamp.ToString(SettingsService.Settings.TimestampFormat))"/>
+                    <RadzenLabel Text="@(SelectedItem.LogEvent.Timestamp.ToString(SettingsService.Settings.TimestampFormat))"/>
 
-                    <RadzenButton Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-ml-auto"
-                                  Icon="content_copy"
-                                  Click="CopyMessage"/>
+                    <RadzenStack Orientation="Orientation.Horizontal" class="rz-ml-auto" Gap="0" AlignItems="AlignItems.Center">
+                        <ToolbarCheckBoxControl CheckBox="@WrapMessageCheckBox" />
+                        <ToolbarButtonControl Button="@CopyMessageButton" />
+                    </RadzenStack>
                 </RadzenStack>
 
-                <pre class="text-view flex-fill">
+                <div class="@($"text-view flex-fill{(WrapMessageCheckBox.IsChecked ? " text-view-wrap" : string.Empty)}")">
                     @LogEventHtmlRenderer.RenderedMultiLineLogMessage(SelectedItem)
-                </pre>
+                </div>
             </RadzenStack>
         </RadzenSplitterPane>
 
-        <RadzenSplitterPane Size="50%" Collapsible="true">
+        <RadzenSplitterPane Collapsible="true" Collapsed="@(!ExceptionPaneVisible)">
             <RadzenStack Orientation="Orientation.Vertical" class="h-100 w-100 no-scroll-x no-scroll-y" Gap="0">
-                <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="4px">
-                    <RadzenButton Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-ml-auto"
-                                  Icon="content_copy"
-                                  Disabled="@(SelectedItem.LogEvent.Exception is null)"
-                                  Click="CopyException" />
+                <RadzenStack Orientation="Orientation.Horizontal" class="rz-p-1" Gap="0.5em" AlignItems="AlignItems.Center">
+                    <RadzenStack Orientation="Orientation.Horizontal" class="rz-ml-auto" Gap="0" AlignItems="AlignItems.Center">
+                        <ToolbarCheckBoxControl CheckBox="@WrapExceptionCheckBox" />
+                        <ToolbarButtonControl Button="@CopyExceptionButton" />
+                    </RadzenStack>
                 </RadzenStack>
 
-                <pre class="text-view flex-fill">
+                <div class="@($"text-view flex-fill{(WrapExceptionCheckBox.IsChecked ? " text-view-wrap" : string.Empty)}")">
                     @RenderedException(SelectedItem)
-                </pre>
+                </div>
             </RadzenStack>
         </RadzenSplitterPane>
     </RadzenSplitter>
@@ -48,10 +50,16 @@ else
 
 <style>
     .text-view {
-        width: 100%;
         overflow-x: auto;
         overflow-y: auto;
         background-color: var(--rz-editor-content-background-color);
         margin: 0;
+        font-family: monospace;
+        white-space: nowrap;
+    }
+
+    .text-view-wrap {
+        width: 100%;
+        white-space: normal !important;
     }
 </style>

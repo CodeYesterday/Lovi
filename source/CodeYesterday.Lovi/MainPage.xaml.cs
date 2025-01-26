@@ -5,6 +5,7 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
+
 #if WINDOWS && !DEBUG
             Loaded += MainPage_Loaded;
 #endif

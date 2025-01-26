@@ -39,6 +39,12 @@ public interface IViewManager
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>Returns <see langword="true"/> if there is a previous view, otherwise <see langword="false"/>.</returns>
     Task<bool> NavigateBackAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Refreshes the view.
+    /// </summary>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    Task Refresh(CancellationToken cancellationToken);
 }
 
 [PublicAPI]
