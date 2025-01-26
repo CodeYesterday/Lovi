@@ -36,6 +36,8 @@ public partial class MainLayout : IAsyncDisposable
     [Inject]
     private AppModel Model { get; set; } = default!;
 
+    private bool FirstRender { get; set; } = true;
+
     private InputHandler InputHandler { get; } = new();
 
     private StatusBarModel StatusBar { get; } = new();
@@ -126,6 +128,13 @@ public partial class MainLayout : IAsyncDisposable
         });
 
         InputHandler.ToolbarsChanged += OnToolbarsChanged;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        FirstRender = false;
+
+        base.OnAfterRender(firstRender);
     }
 
     private async Task OnGoHome(object? parameter)

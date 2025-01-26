@@ -1,12 +1,13 @@
 ﻿@inherits LayoutComponentBase
 
-@if (!string.IsNullOrEmpty(SettingsService.Settings.Theme))
-{
-    <HeadContent>
-        @* <RadzenTheme Theme="dark" /> *@
-        <link rel="stylesheet" href="@($"_content/Radzen.Blazor/css/{SettingsService.Settings.Theme}.css")" />
-    </HeadContent>
+<HeadContent>
+    @* <RadzenTheme Theme="@SettingsService.Settings.Theme" /> not working in Blazor MAUI hybrid *@
+    <link rel="stylesheet" href="@($"_content/Radzen.Blazor/css/{SettingsService.Settings.Theme}.css")" />
+</HeadContent>
 
+@* Do not render anything on 1st render because theme styles have not been loaded yet. *@
+@if (!FirstRender)
+{
     <RadzenComponents/>
 
     <CascadingValue Value="@InputHandler">
