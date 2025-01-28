@@ -65,10 +65,14 @@ public class LogLevelFilterModel
 
     internal static void AppendLogEventLevelFilter(StringBuilder filter, bool[] showLayer)
     {
-        filter.Append(
-            $"({string.Join("or",
-                Enumerable.Range(0, showLayer.Length)
-                    .Where(l => showLayer[l])
-                    .Select(l => $"(np({nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)})={l})"))})");
+        filter.Append($"({nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)} in ({string.Join(",",
+            Enumerable.Range(0, showLayer.Length)
+                .Where(l => showLayer[l])
+                .Select(l => l))}))");
+        //filter.Append(
+        //    $"({string.Join("or",
+        //        Enumerable.Range(0, showLayer.Length)
+        //            .Where(l => showLayer[l])
+        //            .Select(l => $"(np({nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)})={l})"))})");
     }
 }

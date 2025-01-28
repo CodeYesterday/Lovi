@@ -165,9 +165,13 @@ public class LogSession : IAsyncDisposable
             _ => string.Join("and", filters.Select(f => $"({f})"))
         };
 
+        // TODO: This is a hack to prevent an error where 'np' is considered as a property of LogItemModel. Might not work with multiple sort columns.
+        var orderBy = args.OrderBy;
+        //if (orderBy.StartsWith("np")) orderBy = orderBy.Substring(2);
+
         // Get the filtered items:
         var (data, count) = await DataStorage.GetDataAsync(args.Skip, args.Top,
-            args.OrderBy, filter, context, CancellationToken.None).ConfigureAwait(true);
+            orderBy, filter, context, CancellationToken.None).ConfigureAwait(true);
 
         // Update the data:
         FilteredLogEventCount = count;

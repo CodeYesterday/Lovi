@@ -19,7 +19,12 @@
         "Application",
         "SourceContext"
       ],
-      "layersSettings": {}
+      "layersSettings": {
+        "": "1111111",
+        "App1": "1------",
+        "App1|Logski3": "---1---",
+        "App1|Logski2": "-----0-"
+      }
     }
   }
 }
