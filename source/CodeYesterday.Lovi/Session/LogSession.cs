@@ -37,6 +37,8 @@ public class LogSession : IAsyncDisposable
 
     public ISessionConfigStorage? LogSessionConfigStorage { get; private set; }
 
+    public IPropertyStorage? PropertyStorage { get; private set; }
+
     public string SessionDirectory { get; set; }
 
     public string DataDirectory => Path.Combine(SessionDirectory, DataDirectoryName);
@@ -124,13 +126,19 @@ public class LogSession : IAsyncDisposable
         await InitInternalAsync(true, cancellationToken).ConfigureAwait(false);
     }
 
-    public Task SaveDataAsync(CancellationToken cancellationToken)
+    public async Task SaveDataAsync(CancellationToken cancellationToken)
     {
         CheckInitialized();
 
         SessionConfig.WriteLogLevelFilterLayerSettings(LogLevelFilter);
 
-        return LogSessionConfigStorage.WriteSessionConfigAsync(SessionConfig, SessionDirectory, DataDirectory, cancellationToken);
+        await LogSessionConfigStorage
+            .WriteSessionConfigAsync(SessionConfig, SessionDirectory, DataDirectory, cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+
+        await PropertyStorage
+            .SaveProperties(SessionDirectory, DataDirectory, cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
     public async Task LoadDataAsync(LoadDataArgs args, object context)
@@ -286,8 +294,10 @@ public class LogSession : IAsyncDisposable
     {
         DataStorage = new InMemorySessionDataStorage();
 
-        // ReSharper disable once SuspiciousTypeConversion.Global
+        // ReSharper disable SuspiciousTypeConversion.Global
         LogSessionConfigStorage = DataStorage as ISessionConfigStorage ?? new FileSessionConfigStorage();
+        PropertyStorage = DataStorage as IPropertyStorage ?? new FilePropertyStorage();
+        // ReSharper restore SuspiciousTypeConversion.Global
 
         if (isNew)
         {
@@ -295,13 +305,20 @@ public class LogSession : IAsyncDisposable
 
             SessionConfig = new();
 
-            await SaveDataAsync(CancellationToken.None).ConfigureAwait(true);
+            await SaveDataAsync(CancellationToken.None)
+                .ConfigureAwait(ConfigureAwaitOptions.None);
         }
         else
         {
             await DataStorage.OpenAsync(SessionDirectory, DataDirectory, cancellationToken).ConfigureAwait(false);
 
-            SessionConfig = await LogSessionConfigStorage.ReadSessionConfigAsync(SessionDirectory, DataDirectory, cancellationToken).ConfigureAwait(false);
+            SessionConfig = await LogSessionConfigStorage
+                .ReadSessionConfigAsync(SessionDirectory, DataDirectory, cancellationToken)
+                .ConfigureAwait(ConfigureAwaitOptions.None);
+
+            await PropertyStorage
+                .LoadProperties(SessionDirectory, DataDirectory, cancellationToken)
+                .ConfigureAwait(ConfigureAwaitOptions.None);
         }
 
         DataStorage.PropertiesChanged += (_, args) => PropertiesChanged?.Invoke(this, args);
@@ -310,9 +327,10 @@ public class LogSession : IAsyncDisposable
 
     [MemberNotNull(nameof(DataStorage))]
     [MemberNotNull(nameof(LogSessionConfigStorage))]
+    [MemberNotNull(nameof(PropertyStorage))]
     public void CheckInitialized()
     {
-        if (DataStorage is null || LogSessionConfigStorage is null) throw new InvalidOperationException("Session is not initialized");
+        if (DataStorage is null || LogSessionConfigStorage is null || PropertyStorage is null) throw new InvalidOperationException("Session is not initialized");
     }
 
     private async Task WriteSessionInfoFileAsync(string sessionDataStorageId, CancellationToken cancellationToken)
