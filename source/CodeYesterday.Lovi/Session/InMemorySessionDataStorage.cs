@@ -265,7 +265,12 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
         return (query, inMemoryContext.FilteredCount);
     }
 
-    public async Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(LogItemModel item, bool exact, object context, CancellationToken cancellationToken)
+    public Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(LogItemModel item, bool exact, object context, CancellationToken cancellationToken)
+    {
+        return GetLogItemAndIndexAsync(item.Id, item.LogEvent.Timestamp, exact, context, cancellationToken);
+    }
+
+    public async Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(long id, DateTimeOffset timestamp, bool exact, object context, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -275,11 +280,11 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
 
         var data = GetDataAsOrderedQueryable(inMemoryContext, true);
 
-        var tuple = GetItemAndIndexOf(data, x => x.Id == item.Id);
+        var tuple = GetItemAndIndexOf(data, x => x.Id == id);
 
         if (tuple is null || exact) return tuple;
 
-        return await GetLogItemAndIndexAsync(item.LogEvent.Timestamp, false, context, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        return await GetLogItemAndIndexAsync(timestamp, false, context, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
     public Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(DateTimeOffset timestamp, bool exact, object context, CancellationToken cancellationToken)

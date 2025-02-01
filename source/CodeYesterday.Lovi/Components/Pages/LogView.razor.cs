@@ -15,6 +15,7 @@ public partial class LogView
 
     private RadzenDataGrid<LogItemModel> _dataGrid = default!;
     private object? _logViewContext;
+    private int _restoreTopRow = -1;
 
     [Inject]
     private NotificationService NotificationService { get; set; } = default!;
@@ -36,6 +37,40 @@ public partial class LogView
         }
 
         return base.OnOpeningAsync(cancellationToken);
+    }
+
+    public override async Task OnOpenedAsync(CancellationToken cancellationToken)
+    {
+        // Restore selected item.
+        if (Session?.PropertyStorage is not null && Session?.DataStorage is not null && _logViewContext is not null)
+        {
+            if (Session.PropertyStorage.TryGetPropertyValue("SelectedLogItem.Id", out long selectedId) &&
+                Session.PropertyStorage.TryGetPropertyValue("SelectedLogItem.Timestamp", out DateTimeOffset selectedTimestamp))
+            {
+                var item = await Session.DataStorage
+                    .GetLogItemAndIndexAsync(selectedId, selectedTimestamp, false, _logViewContext, cancellationToken)
+                    .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+
+                if (item is not null)
+                {
+                    Session.SelectedLogItem = item.Value.item;
+                }
+            }
+
+            if (Session.PropertyStorage.TryGetPropertyValue("DataGrid.TopRow", out int topRow))
+            {
+                _restoreTopRow = topRow;
+            }
+
+            if (Session.PropertyStorage.TryGetPropertyValue("DataGrid.LeftScrollPosition", out int leftScrollPosition))
+            {
+                await SetDataGridLeftScrollPositionAsync(leftScrollPosition, cancellationToken)
+                    .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+            }
+        }
+
+        await base.OnOpenedAsync(cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
     }
 
     public override Task OnClosedAsync(CancellationToken cancellationToken)
@@ -124,6 +159,25 @@ public partial class LogView
             Session.Refreshing -= OnRefreshing;
 
             await Session.SaveDataAsync(CancellationToken.None).ConfigureAwait(true);
+
+            // Persist selected log item:
+            if (Session.SelectedLogItem is null)
+            {
+                Session.PropertyStorage?.RemovePropertyValue("SelectedLogItem.Id");
+                Session.PropertyStorage?.RemovePropertyValue("SelectedLogItem.Timestamp");
+            }
+            else
+            {
+                Session.PropertyStorage?.SetPropertyValue("SelectedLogItem.Id", Session.SelectedLogItem.Id);
+                Session.PropertyStorage?.SetPropertyValue("SelectedLogItem.Timestamp", Session.SelectedLogItem.LogEvent.Timestamp);
+            }
+
+            var topRow = await GetDataGridTopRowIndexAsync(cancellationToken)
+                .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+            var leftScrollPosition = await GetDataGridLeftScrollPositionAsync(cancellationToken)
+                .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+            Session.PropertyStorage?.SetPropertyValue("DataGrid.TopRow", topRow);
+            Session.PropertyStorage?.SetPropertyValue("DataGrid.LeftScrollPosition", leftScrollPosition);
         }
 
         await base.OnClosingAsync(cancellationToken).ConfigureAwait(true);
@@ -131,11 +185,11 @@ public partial class LogView
 
     private IList<LogItemModel>? SelectedItems
     {
-        get => Model.Session?.SelectedLogItem is null ? null : [Model.Session.SelectedLogItem];
+        get => Session?.SelectedLogItem is null ? null : [Session.SelectedLogItem];
         set
         {
-            if (Model.Session is null) return;
-            Model.Session.SelectedLogItem = value?.FirstOrDefault();
+            if (Session is null) return;
+            Session.SelectedLogItem = value?.FirstOrDefault();
         }
     }
 
@@ -167,7 +221,22 @@ public partial class LogView
             NotificationService.Notify(NotificationSeverity.Error, "Update Data Grid", ex.Message);
         }
 
+        _ = InvokeAsync(RestoreTopRow);
+
         OnUpdateStatusBarItem();
+    }
+
+    private async Task RestoreTopRow()
+    {
+        var topRow = _restoreTopRow;
+        if (topRow >= 0)
+        {
+            if (await SetDataGridTopRowIndexAsync(topRow, CancellationToken.None)
+                    .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext))
+            {
+                _restoreTopRow = -1;
+            }
+        }
     }
 
     private Task OnEditSession(object? _)

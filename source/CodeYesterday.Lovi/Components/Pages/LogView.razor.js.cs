@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CodeYesterday.Lovi.Components.Pages;
 
+[PublicAPI]
 public partial class LogView : IAsyncDisposable
 {
     private IJSObjectReference? _jsModule;
@@ -46,6 +47,36 @@ public partial class LogView : IAsyncDisposable
         await EnsureModuleLoadedAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         return await _jsModule.InvokeAsync<int>("getRowHeight", cancellationToken, _dataGrid.UniqueID).ConfigureAwait(true);
+    }
+
+    private async Task<int> GetDataGridTopRowIndexAsync(CancellationToken cancellationToken = default)
+    {
+        if (!await CheckDataGridRowHeightAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext)) return 0;
+
+        return await _jsModule.InvokeAsync<int>("getTopRowIndex", cancellationToken, _dataGrid.UniqueID, _rowHeight).ConfigureAwait(true);
+    }
+
+    private async Task<bool> SetDataGridTopRowIndexAsync(int topRowIndex, CancellationToken cancellationToken = default)
+    {
+        if (!await CheckDataGridRowHeightAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext)) return false;
+
+        await _jsModule.InvokeVoidAsync("setTopRowIndex", cancellationToken, _dataGrid.UniqueID, topRowIndex, _rowHeight).ConfigureAwait(true);
+
+        return true;
+    }
+
+    private async Task<int> GetDataGridLeftScrollPositionAsync(CancellationToken cancellationToken = default)
+    {
+        await EnsureModuleLoadedAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+
+        return await _jsModule.InvokeAsync<int>("getLeftScrollPosition", cancellationToken, _dataGrid.UniqueID).ConfigureAwait(true);
+    }
+
+    private async Task SetDataGridLeftScrollPositionAsync(int scrollPosition, CancellationToken cancellationToken = default)
+    {
+        await EnsureModuleLoadedAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+
+        await _jsModule.InvokeVoidAsync("setLeftScrollPosition", cancellationToken, _dataGrid.UniqueID, scrollPosition).ConfigureAwait(true);
     }
 
     [MemberNotNull(nameof(_jsModule))]

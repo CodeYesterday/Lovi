@@ -127,9 +127,43 @@ public interface ISessionDataStorage
     Task<(IQueryable<LogItemModel>, int)> GetDataAsync(int? skip, int? take, string orderBy, string filter,
         object context, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Gets the item and index of a <see cref="LogItemModel"/>.
+    /// </summary>
+    /// <param name="model">The <see cref="LogItemModel"/> to search for.</param>
+    /// <param name="exact">If <see langword="true"/> only an exact match of the ID is returned. If <see langword="false"/> and no exact match is found, the item with the closes timestamp is returned instead.</param>
+    /// <param name="context">The current view context.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>Returns the item and index of the item in the current <paramref name="context"/>. Returns <see langword="null"/> if no matching item was found.</returns>
     Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(LogItemModel model, bool exact, object context, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Gets the item and index of a <see cref="LogItemModel"/>.
+    /// </summary>
+    /// <param name="id">The ID of the <see cref="LogItemModel"/> to search for.</param>
+    /// <param name="timestamp">The timestamp of the <see cref="LogItemModel"/> to search for.</param>
+    /// <param name="exact">If <see langword="true"/> only an exact match of the ID is returned. If <see langword="false"/> and no exact match is found, the item with the closes timestamp is returned instead.</param>
+    /// <param name="context">The current view context.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>Returns the item and index of the item in the current <paramref name="context"/>. Returns <see langword="null"/> if no matching item was found.</returns>
+    Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(long id, DateTimeOffset timestamp, bool exact, object context, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the item and index of a <see cref="LogItemModel"/>.
+    /// </summary>
+    /// <param name="timestamp">The timestamp of the <see cref="LogItemModel"/> to search for.</param>
+    /// <param name="exact">If <see langword="true"/> only an exact match of the ID is returned. If <see langword="false"/> and no exact match is found, the item with the closes timestamp is returned instead.</param>
+    /// <param name="context">The current view context.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>Returns the item and index of the item in the current <paramref name="context"/>. Returns <see langword="null"/> if no matching item was found.</returns>
     Task<(LogItemModel item, int index)?> GetLogItemAndIndexAsync(DateTimeOffset timestamp, bool exact, object context, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Gets the <see cref="LogItemModel"/> at the given <paramref name="index"/> in a view <paramref name="context"/>.
+    /// </summary>
+    /// <param name="index">The index of the item in.</param>
+    /// <param name="context">The current view context.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>Returns the <see cref="LogItemModel"/> in the current <paramref name="context"/>. Returns <see langword="null"/> if no matching item was found.</returns>
     Task<LogItemModel?> GetLogItemByIndexAsync(int index, object context, CancellationToken cancellationToken);
 }
