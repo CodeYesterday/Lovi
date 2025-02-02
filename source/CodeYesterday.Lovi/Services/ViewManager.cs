@@ -156,6 +156,19 @@ internal class ViewManager : IViewManagerInternal
         return pane.OnOpenedAsync(CancellationToken.None);
     }
 
+    public async Task OnAppExitAsync(CancellationToken cancellationToken)
+    {
+        // Notify current view about being closed.
+        _lastView = CurrentView;
+        if (_lastView is not null)
+        {
+            await _lastView.OnClosingAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+            CurrentView = null;
+            await _lastView.OnClosedAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+            _lastView = null;
+        }
+    }
+
     [MemberNotNull(nameof(_navigationManager))]
     private void CheckInitialized()
     {

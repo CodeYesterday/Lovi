@@ -22,7 +22,7 @@
           "UniqueID": null,
           "Property": "LogEvent.Timestamp",
           "Visible": true,
-          "Width": "170px",
+          "Width": "161px",
           "OrderIndex": 1,
           "SortOrder": 0,
           "SortIndex": 0,

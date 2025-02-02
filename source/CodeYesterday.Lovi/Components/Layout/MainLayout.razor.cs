@@ -139,20 +139,6 @@ public partial class MainLayout : IAsyncDisposable
 
     private async Task OnGoHome(object? parameter)
     {
-        if (Model.Session is not null)
-        {
-            try
-            {
-                await Model.Session.UnloadDataAsync(CancellationToken.None);
-            }
-            catch
-            {
-                // ignored
-            }
-
-            Model.Session = null;
-        }
-
         await ViewManagerInternal.NavigateToAsync(ViewId.StartView, CancellationToken.None).ConfigureAwait(true);
     }
 

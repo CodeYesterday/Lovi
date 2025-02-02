@@ -26,6 +26,29 @@ public partial class StartView
 
     private bool DisableButtons { get; set; }
 
+    public override async Task OnOpenedAsync(CancellationToken cancellationToken)
+    {
+
+        if (Model.Session is not null)
+        {
+            try
+            {
+                await Model.Session
+                    .UnloadDataAsync(CancellationToken.None)
+                    .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+            }
+            catch
+            {
+                // ignored
+            }
+
+            Model.Session = null;
+        }
+        await base
+            .OnOpenedAsync(cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+    }
+
     private async Task OnNewSession()
     {
         try

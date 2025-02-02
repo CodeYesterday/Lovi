@@ -59,6 +59,8 @@ public interface IViewManagerInternal : IViewManager
     Task OnOpeningPaneAsync(LoviPane pane);
 
     Task OnPaneOpenedAsync(LoviPane pane);
+
+    Task OnAppExitAsync(CancellationToken cancellationToken);
 }
 
 public enum ViewId

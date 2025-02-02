@@ -5,10 +5,12 @@ namespace CodeYesterday.Lovi
     public partial class App
     {
         private readonly IUserSettingsService<App> _userSettings;
+        private readonly IViewManagerInternal _viewManager;
 
-        public App(IUserSettingsService<App> userSettings)
+        public App(IUserSettingsService<App> userSettings, IViewManagerInternal viewManager)
         {
             _userSettings = userSettings;
+            _viewManager = viewManager;
             InitializeComponent();
         }
 
@@ -36,6 +38,7 @@ namespace CodeYesterday.Lovi
 
         private void WindowOnDestroying(object? sender, EventArgs e)
         {
+            _viewManager.OnAppExitAsync(CancellationToken.None);
             SavePosition(sender as Window);
         }
 
