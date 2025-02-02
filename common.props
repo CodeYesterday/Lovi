@@ -1,5 +1,14 @@
 <Project>
   <PropertyGroup>
+    <Authors>CodeYesterday</Authors>
+    <Copyright>Copyright (c) 2025 Code Yesterday</Copyright>
+    <PackageProjectUrl>https://github.com/CodeYesterday/Lovi</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/CodeYesterday/Lovi</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
