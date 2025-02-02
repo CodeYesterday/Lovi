@@ -24,7 +24,8 @@ else
                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
                         AllowSorting="true" AllowMultiColumnSorting="true"
                         AllowColumnPicking="true" Density="Density.Compact"
-                        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems">
+                        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems"
+                        @bind-Settings="DataGridSettings" LoadSettings="OnLoadSettings">
 
             <Columns>
                 <RadzenDataGridColumn Title="Level" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)}")"

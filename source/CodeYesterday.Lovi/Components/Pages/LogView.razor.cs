@@ -14,6 +14,7 @@ public partial class LogView
     private readonly StatusBarTextItem _statusBarItem = new() { Id = "LogView.Count", OrderIndex = -1 };
 
     private RadzenDataGrid<LogItemModel> _dataGrid = default!;
+    private DataGridSettings? _dataGridSettings;
     private object? _logViewContext;
     private int _restoreTopRow = -1;
 
@@ -183,6 +184,16 @@ public partial class LogView
         await base.OnClosingAsync(cancellationToken).ConfigureAwait(true);
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        // DataGrid settings MUST be loaded after 1st render, otherwise it won't work.
+        if (firstRender)
+        {
+            _dataGridSettings = Session?.PropertyStorage?.TryGetPropertyValue("LogDataGrid.Settings", out DataGridSettings? settings) == true ? settings : null;
+        }
+        base.OnAfterRender(firstRender);
+    }
+
     private IList<LogItemModel>? SelectedItems
     {
         get => Session?.SelectedLogItem is null ? null : [Session.SelectedLogItem];
@@ -190,6 +201,27 @@ public partial class LogView
         {
             if (Session is null) return;
             Session.SelectedLogItem = value?.FirstOrDefault();
+        }
+    }
+
+    public DataGridSettings? DataGridSettings
+    {
+        get => _dataGridSettings;
+        set
+        {
+            if (value != _dataGridSettings)
+            {
+                _dataGridSettings = value;
+                Session?.PropertyStorage?.SetPropertyValue("LogDataGrid.Settings", value);
+            }
+        }
+    }
+
+    private void OnLoadSettings(DataGridLoadSettingsEventArgs args)
+    {
+        if (DataGridSettings is not null)
+        {
+            args.Settings = DataGridSettings;
         }
     }
 
