@@ -1,5 +1,6 @@
-﻿using CodeYesterday.Lovi.Components;
-using CodeYesterday.Lovi.Components.Pages;
+﻿using CodeYesterday.Lovi.Components.Pages;
+using CodeYesterday.Lovi.Components.Panes;
+using CodeYesterday.Lovi.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace CodeYesterday.Lovi.Services;
@@ -11,34 +12,30 @@ namespace CodeYesterday.Lovi.Services;
 public interface IViewManager
 {
     /// <summary>
-    /// Gets the previous view ID.
-    /// </summary>
-    public ViewId? PreviousViewId { get; }
-
-    /// <summary>
-    /// Gets the current view ID.
-    /// </summary>
-    public ViewId CurrentViewId { get; }
-
-    /// <summary>
     /// Gets the current view.
     /// </summary>
     LoviView? CurrentView { get; }
 
+    public ViewModel? SelectedView { get; }
+
+    IList<ViewModel> Views { get; }
+
+    event EventHandler? ViewsChanged;
+
+    ViewModel? GetView(ViewType type, int sessionId = 0);
+
     /// <summary>
     /// Navigates to the view.
     /// </summary>
-    /// <param name="id">The view to navigate to.</param>
+    /// <param name="view">The view to navigate to.</param>
+    /// <param name="closeCurrentView"><see langword="true"/> to close the currently opened view.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns></returns>
-    Task NavigateToAsync(ViewId id, CancellationToken cancellationToken);
+    Task ShowViewAsync(ViewModel view, bool closeCurrentView, CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Navigates to the previous view. If there is no previous view nothing happens.
-    /// </summary>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>Returns <see langword="true"/> if there is a previous view, otherwise <see langword="false"/>.</returns>
-    Task<bool> NavigateBackAsync(CancellationToken cancellationToken);
+    Task AddViewAsync(ViewModel view, bool show, bool closeCurrentView, CancellationToken cancellationToken);
+
+    Task CloseViewAsync(ViewModel view, CancellationToken cancellationToken);
 
     /// <summary>
     /// Refreshes the view.
@@ -63,10 +60,10 @@ public interface IViewManagerInternal : IViewManager
     Task OnAppExitAsync(CancellationToken cancellationToken);
 }
 
-public enum ViewId
+public enum ViewType : short
 {
-    StartView,
-    SessionConfig,
-    LogView,
-    Settings
+    StartView = 0,
+    SessionConfig = 100,
+    LogView = 101,
+    Settings = -1
 }

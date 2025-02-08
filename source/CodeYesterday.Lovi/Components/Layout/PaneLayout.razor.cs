@@ -29,6 +29,8 @@ public partial class PaneLayout : IPaneLayout
     [CascadingParameter]
     public InputHandler? ToolbarContainer { get; set; }
 
+    public int SessionId { get; set; }
+
     public IUserSettingsService? PaneUserSettings { get; set; }
 
     public PaneItem? LeftPane { get; set; }

@@ -65,7 +65,7 @@ public partial class LogView
 
             if (Session.PropertyStorage.TryGetPropertyValue("DataGrid.LeftScrollPosition", out int leftScrollPosition))
             {
-                await SetDataGridLeftScrollPositionAsync(leftScrollPosition, cancellationToken)
+                await SetDataGridLeftScrollPositionAsync(leftScrollPosition, true, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
             }
         }
@@ -232,7 +232,7 @@ public partial class LogView
 
     private void OnUpdateStatusBarItem()
     {
-        _statusBarItem.Text = $"Log event count: Total: {Model.Session?.FullLogEventCount} View: {Model.Session?.FilteredLogEventCount}";
+        _statusBarItem.Text = $"Log event count: Total: {Session?.FullLogEventCount} View: {Session?.FilteredLogEventCount}";
     }
 
     private void OnPropertiesChanged(object? sender, EventArgs e)
@@ -263,7 +263,7 @@ public partial class LogView
         var topRow = _restoreTopRow;
         if (topRow >= 0)
         {
-            if (await SetDataGridTopRowIndexAsync(topRow, CancellationToken.None)
+            if (await SetDataGridTopRowIndexAsync(topRow, true, CancellationToken.None)
                     .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext))
             {
                 _restoreTopRow = -1;
@@ -273,7 +273,21 @@ public partial class LogView
 
     private Task OnEditSession(object? _)
     {
-        return ViewManager.NavigateToAsync(ViewId.SessionConfig, CancellationToken.None);
+        if (Session is null) return Task.CompletedTask;
+
+        var view = ViewManagerInternal.GetView(ViewType.SessionConfig, Session.SessionId);
+        if (view is not null)
+        {
+            return ViewManagerInternal.ShowViewAsync(view, false, CancellationToken.None);
+        }
+
+        view = new()
+        {
+            Type = ViewType.SessionConfig,
+            SessionId = Session.SessionId,
+            CustomTitle = Session.SessionDirectory
+        };
+        return ViewManagerInternal.AddViewAsync(view, true, false, CancellationToken.None);
     }
 
     private Task OnRefreshExecute(object? _)
@@ -299,7 +313,7 @@ public partial class LogView
 
         await _dataGrid.SelectRow(tuple.Value.item).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
 
-        await ScrollDataGridRowIntoViewAsync(tuple.Value.index, CancellationToken.None)
+        await ScrollDataGridRowIntoViewAsync(tuple.Value.index, false, CancellationToken.None)
             .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
     }
 
@@ -313,7 +327,7 @@ public partial class LogView
 
         if (tuple is null) return;
 
-        await ScrollDataGridRowIntoViewAsync(tuple.Value.index, CancellationToken.None)
+        await ScrollDataGridRowIntoViewAsync(tuple.Value.index, false, CancellationToken.None)
             .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
     }
 

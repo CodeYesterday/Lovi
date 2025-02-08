@@ -1,11 +1,11 @@
-﻿@page "/log"
+﻿@page "/log/{SessionId:int}"
 
 @using CodeYesterday.Lovi.Components.Layout
 @using CodeYesterday.Lovi.Helper
 @using CodeYesterday.Lovi.Models
 @using Serilog.Events
 
-@inherits LoviView
+@inherits SessionView
 @layout PaneLayout
 
 @if (Session?.DataStorage is null)
@@ -17,20 +17,20 @@ else
     <RadzenStack Orientation="Orientation.Vertical" class="h-100" Gap="0">
         @* Logs data grid *@
         <RadzenDataGrid @ref="_dataGrid" Class="flex-fill w-100"
-                        KeyProperty="@nameof(LogItemModel.Id)"
-                        TItem="LogItemModel" Data="@Session.PagedItems" Count="@Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
-                        AllowColumnReorder="true" AllowColumnResize="true"
-                        AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"
-                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
-                        AllowSorting="true" AllowMultiColumnSorting="true"
-                        AllowColumnPicking="true" Density="Density.Compact"
-                        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems"
-                        @bind-Settings="DataGridSettings" LoadSettings="OnLoadSettings">
+        KeyProperty="@nameof(LogItemModel.Id)"
+        TItem="LogItemModel" Data="@Session.PagedItems" Count="@Session.FilteredLogEventCount" LoadData="@LoadData" AllowVirtualization="true"
+        AllowColumnReorder="true" AllowColumnResize="true"
+        AllowFiltering="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterMode="FilterMode.SimpleWithMenu"
+        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.And"
+        AllowSorting="true" AllowMultiColumnSorting="true"
+        AllowColumnPicking="true" Density="Density.Compact"
+        SelectionMode="DataGridSelectionMode.Single" @bind-Value="SelectedItems"
+        @bind-Settings="DataGridSettings" LoadSettings="OnLoadSettings">
 
             <Columns>
                 <RadzenDataGridColumn Title="Level" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Level)}")"
-                                      Width="50px" MinWidth="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
-                                      Sortable="true" Filterable="false">
+                Width="50px" MinWidth="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                Sortable="true" Filterable="false">
                     <Template Context="item">
                         @{
                             var itemSettings = SettingsService.Settings.GetLogLevelSettings(item.LogEvent.Level);
@@ -40,43 +40,43 @@ else
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Title="Timestamp" Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.Timestamp)}")"
-                                      FormatString="@SettingsService.Settings.TimestampFormatString"
-                                      TextAlign="TextAlign.Right"
-                                      Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
-                                      Sortable="true" Filterable="true"
-                                      SortOrder="SortOrder.Ascending" />
+                FormatString="@SettingsService.Settings.TimestampFormatString"
+                TextAlign="TextAlign.Right"
+                Width="160px" MinWidth="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left"
+                Sortable="true" Filterable="true"
+                SortOrder="SortOrder.Ascending" />
 
                 @* Pull columns in LogLevelFilter forward *@
                 @foreach (var property in Session.LogLevelFilter.ActualLayerProperties
-                   .Select(pn => Session.DataStorage.Properties
-                   .FirstOrDefault(p => string.Equals(p.Name, pn, StringComparison.Ordinal)))
-                   .Where(pn => pn is not null))
+                  .Select(pn => Session.DataStorage.Properties
+                  .FirstOrDefault(p => string.Equals(p.Name, pn, StringComparison.Ordinal)))
+                  .Where(pn => pn is not null))
                 {
                     @RenderPropertyColumn(property!)
                 }
 
                 <RadzenDataGridColumn Title="Message" Width="500px" MinWidth="40px"
-                                      Property="@nameof(LogItemModel.RenderedMessage)"
-                                      Sortable="true" Filterable="true" Type="@typeof(string)">
+                Property="@nameof(LogItemModel.RenderedMessage)"
+                Sortable="true" Filterable="true" Type="@typeof(string)">
                     <Template Context="evt">
                         @LogEventHtmlRenderer.RenderedLogMessage(evt)
                     </Template>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Title="Message template" Width="100px" MinWidth="40px" Visible="false"
-                                      Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.MessageTemplate)}")"
-                                      Sortable="true" />
+                Property="@($"{nameof(LogItemModel.LogEvent)}.{nameof(LogEvent.MessageTemplate)}")"
+                Sortable="true" />
 
                 <RadzenDataGridColumn Title="Exception" Width="100px" MinWidth="40px"
-                                      Property="@($"{nameof(LogItemModel.ExceptionText)}")"
-                                      Sortable="true" Filterable="true" />
+                Property="@($"{nameof(LogItemModel.ExceptionText)}")"
+                Sortable="true" Filterable="true" />
 
                 @* Property columns *@
                 @foreach (var property in Session.DataStorage.Properties
-                    .Where(p => !Session.LogLevelFilter.ActualLayerProperties.Contains(p.Name)))
-                    {
-                        @RenderPropertyColumn(property)
-                    }
+                   .Where(p => !Session.LogLevelFilter.ActualLayerProperties.Contains(p.Name)))
+                {
+                    @RenderPropertyColumn(property)
+                }
                 }
             </Columns>
         </RadzenDataGrid>
@@ -87,6 +87,7 @@ else
 {
     public override Task OnCreatePanesAsync(IPaneLayout paneLayout, CancellationToken cancellationToken)
     {
+        paneLayout.SessionId = SessionId;
         paneLayout.PaneUserSettings = UserSettings;
 
         paneLayout.LeftPane = new()

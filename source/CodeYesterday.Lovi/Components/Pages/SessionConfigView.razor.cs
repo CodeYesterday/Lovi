@@ -124,7 +124,24 @@ public partial class SessionConfigView
         {
             await ImportDataAsync(CancellationToken.None).ConfigureAwait(true);
 
-            await ViewManager.NavigateToAsync(ViewId.LogView, CancellationToken.None).ConfigureAwait(true);
+            var view = ViewManagerInternal.GetView(ViewType.LogView, Session.SessionId);
+            if (view is not null)
+            {
+                await ViewManagerInternal
+                    .ShowViewAsync(view, false, CancellationToken.None)
+                    .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+                return;
+            }
+
+            view = new()
+            {
+                Type = ViewType.LogView,
+                SessionId = Session.SessionId,
+                CustomTitle = Session.SessionDirectory
+            };
+            await ViewManagerInternal
+                .AddViewAsync(view, true, false, CancellationToken.None)
+                .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
         }
         catch (Exception ex)
         {

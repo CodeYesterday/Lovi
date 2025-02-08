@@ -33,8 +33,8 @@ public partial class MainLayout : IAsyncDisposable
     [Inject]
     private ISettingsService SettingsService { get; set; } = default!;
 
-    [Inject]
-    private AppModel Model { get; set; } = default!;
+    //[Inject]
+    //private AppModel Model { get; set; } = default!;
 
     private bool FirstRender { get; set; } = true;
 
@@ -75,21 +75,23 @@ public partial class MainLayout : IAsyncDisposable
         await EnsureModuleLoadedAsync(CancellationToken.None)
             .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
 
+        ViewManagerInternal.ViewsChanged += ViewManagerInternalOnViewsChanged;
+
         // Main toolbar
-        InputHandler.AddOrUpdateToolbar(new()
-        {
-            Id = "~Main",
-            OrderIndex = 0,
-            Items =
-            [
-                new ToolbarButton
-                {
-                    Icon = "home",
-                    Tooltip = "Home",
-                    Command = new AsyncCommand(OnGoHome)
-                }
-            ]
-        });
+        //InputHandler.AddOrUpdateToolbar(new()
+        //{
+        //    Id = "~Main",
+        //    OrderIndex = 0,
+        //    Items =
+        //    [
+        //        new ToolbarButton
+        //        {
+        //            Icon = "home",
+        //            Tooltip = "Home",
+        //            Command = new AsyncCommand(OnGoHome)
+        //        }
+        //    ]
+        //});
 
         // System toolbar
         InputHandler.AddOrUpdateToolbar(new()
@@ -130,6 +132,11 @@ public partial class MainLayout : IAsyncDisposable
         InputHandler.ToolbarsChanged += OnToolbarsChanged;
     }
 
+    private void ViewManagerInternalOnViewsChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         FirstRender = false;
@@ -137,14 +144,24 @@ public partial class MainLayout : IAsyncDisposable
         base.OnAfterRender(firstRender);
     }
 
-    private async Task OnGoHome(object? parameter)
-    {
-        await ViewManagerInternal.NavigateToAsync(ViewId.StartView, CancellationToken.None).ConfigureAwait(true);
-    }
+    //private async Task OnGoHome(object? parameter)
+    //{
+    //    await ViewManagerInternal.NavigateToAsync(ViewType.StartView, CancellationToken.None).ConfigureAwait(true);
+    //}
 
     private Task OnShowSettings(object? parameter)
     {
-        return ViewManagerInternal.NavigateToAsync(ViewId.Settings, CancellationToken.None);
+        var view = ViewManagerInternal.Views.FirstOrDefault(v => v.Type == ViewType.Settings);
+        if (view is not null)
+        {
+            return ViewManagerInternal.ShowViewAsync(view, false, CancellationToken.None);
+        }
+
+        view = new()
+        {
+            Type = ViewType.Settings
+        };
+        return ViewManagerInternal.AddViewAsync(view, true, false, CancellationToken.None);
     }
 
     private Task OnShowHelp(object? parameter)
@@ -216,5 +233,19 @@ public partial class MainLayout : IAsyncDisposable
     public void OnKeyEvent(string code, bool shiftKey, bool altKey, bool ctrlKey)
     {
         InputHandler.OnKeyPress(code, shiftKey, altKey, ctrlKey);
+    }
+
+    private async Task OnViewChanged(ViewModel newView)
+    {
+        var cancellationToken = CancellationToken.None;
+
+        await ViewManagerInternal
+            .ShowViewAsync(newView, false, cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+    }
+
+    private Task OnCloseView(ViewModel view)
+    {
+        return ViewManagerInternal.CloseViewAsync(view, CancellationToken.None);
     }
 }

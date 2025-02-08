@@ -20,8 +20,8 @@ public partial class AdvancedFilterPane
 
     private void ViewChanged()
     {
-        if (Model.Session is null) return;
+        if (Session is null) return;
 
-        Model.Session.AdvancedFilterExpression = _dataFilter.ToFilterString();
+        Session.AdvancedFilterExpression = _dataFilter.ToFilterString();
     }
 }

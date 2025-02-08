@@ -1,5 +1,4 @@
-﻿using CodeYesterday.Lovi.Models;
-using CodeYesterday.Lovi.Services;
+﻿using CodeYesterday.Lovi.Services;
 using CodeYesterday.Lovi.Session;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
@@ -36,7 +35,7 @@ namespace CodeYesterday.Lovi
             builder.Services.AddSingleton<IImporterManager, ImporterManager>();
             builder.Services.AddSingleton<ISettingsService, SettingsService>();
             builder.Services.AddSingleton<IProgressIndicator, ProgressIndicator>();
-            builder.Services.AddSingleton<AppModel>();
+            builder.Services.AddSingleton<ISessionService, SessionService>();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

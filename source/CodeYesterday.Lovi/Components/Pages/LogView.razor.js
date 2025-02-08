@@ -32,28 +32,18 @@ export function getRowHeight(dataGridId) {
     return rows[0].offsetHeight;
 }
 
-export function scrollToRow(dataGridId, rowIndex, rowHeight) {
+export function scrollToRow(dataGridId, rowIndex, rowHeight, instant) {
     const container = getContainer(dataGridId);
 
     const scrollRow = rowIndex * rowHeight;
 
     container.scrollTo({
         top: scrollRow,
-        behavior: 'smooth' // Optional: for smooth scrolling
+        behavior: instant ? 'instant' : 'smooth' // Optional: for smooth scrolling
     });
 }
 
-export function scrollRowIntoView(dataGridId, newScrollRow, rowHeight) {
-    //const container = getContainer(dataGridId);
-    //const tHead = container.getElementsByTagName('thead')[0];
-
-    //// subtract table header from client height
-    //const clientHeight = container.clientHeight - tHead.offsetHeight;
-
-    //const maxRowCount = Math.floor(clientHeight / rowHeight);
-    //const currentScrollPosition = container.scrollTop;
-    //const firstScrollRow = Math.ceil(currentScrollPosition / rowHeight);
-    //const lastScrollRow = (firstScrollRow + maxRowCount) - 1;
+export function scrollRowIntoView(dataGridId, newScrollRow, rowHeight, instant) {
 
     const metrics = getContainerMetrics(dataGridId, rowHeight);
 
@@ -72,7 +62,7 @@ export function scrollRowIntoView(dataGridId, newScrollRow, rowHeight) {
 
     metrics.container.scrollTo({
         top: scrollPosition,
-        behavior: 'smooth' // Optional: for smooth scrolling
+        behavior: instant ? 'instant' : 'smooth' // Optional: for smooth scrolling
     });
 }
 
@@ -82,14 +72,14 @@ export function getTopRowIndex(dataGridId, rowHeight) {
     return metrics.firstScrollRow;
 }
 
-export function setTopRowIndex(dataGridId, topRowIndex, rowHeight) {
+export function setTopRowIndex(dataGridId, topRowIndex, rowHeight, instant) {
     const metrics = getContainerMetrics(dataGridId, rowHeight);
 
     const scrollPosition = Math.max(0, Math.min(topRowIndex * rowHeight, metrics.container.scrollHeight));
     console.log(topRowIndex, rowHeight, scrollPosition);
     metrics.container.scrollTo({
         top: scrollPosition,
-        behavior: 'smooth' // Optional: for smooth scrolling
+        behavior: instant ? 'instant' : 'smooth' // Optional: for smooth scrolling
     });
 }
 
@@ -99,13 +89,13 @@ export function getLeftScrollPosition(dataGridId) {
     return container.scrollLeft;
 }
 
-export function setLeftScrollPosition(dataGridId, position) {
+export function setLeftScrollPosition(dataGridId, position, instant) {
     const container = getContainer(dataGridId);
 
     const scrollPosition = Math.max(0, Math.min(position, container.scrollWidth));
 
     container.scrollTo({
         left: scrollPosition,
-        behavior: 'smooth' // Optional: for smooth scrolling
+        behavior: instant ? 'instant' : 'smooth' // Optional: for smooth scrolling
     });
 }

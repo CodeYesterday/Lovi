@@ -9,6 +9,11 @@ namespace CodeYesterday.Lovi.Models;
 public interface IPaneLayout
 {
     /// <summary>
+    /// Gets or sets the sessionId for the pane.
+    /// </summary>
+    int SessionId { get; set; }
+
+    /// <summary>
     /// Gets or sets the user-settings to be used for persisting the visibility and size of the panes.
     /// </summary>
     IUserSettingsService? PaneUserSettings { get; set; }

@@ -1,8 +1,8 @@
-@page "/session_config"
+@page "/session_config/{SessionId:int}"
 
 @using CodeYesterday.Lovi.Models
 
-@inherits LoviView
+@inherits SessionView
 
 @if (Session?.DataStorage is null)
 {

@@ -31,6 +31,8 @@ public class LogSession : IAsyncDisposable
     private string? _advancedFilterExpression;
     private bool _disableFilterChanged;
 
+    public required int SessionId { get; init; }
+
     public required IImporterManager ImporterManager { get; init; }
 
     public ISessionDataStorage? DataStorage { get; private set; }

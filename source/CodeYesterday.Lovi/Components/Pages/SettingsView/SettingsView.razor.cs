@@ -1,5 +1,6 @@
 ﻿using CodeYesterday.Lovi.Input;
 using CodeYesterday.Lovi.Models;
+using CodeYesterday.Lovi.Services;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Toolbar = CodeYesterday.Lovi.Input.Toolbar;
@@ -100,7 +101,11 @@ public partial class SettingsView
             NotificationService.Notify(NotificationSeverity.Error, "Save settings failed", ex.Message, 20000d);
         }
 
-        await ViewManager.NavigateBackAsync(CancellationToken.None).ConfigureAwait(true);
+        var view = ViewManagerInternal.GetView(ViewType.Settings);
+        if (view is not null)
+        {
+            await ViewManager.CloseViewAsync(view, CancellationToken.None).ConfigureAwait(true);
+        }
     }
 
     private async Task OnDiscardAndCloseAsync(object? parameter)
@@ -114,7 +119,7 @@ public partial class SettingsView
             NotificationService.Notify(NotificationSeverity.Error, "Load settings failed", ex.Message, 20000d);
         }
 
-        await ViewManager.NavigateBackAsync(CancellationToken.None).ConfigureAwait(true);
+        await ViewManager.CloseViewAsync(ViewModel, CancellationToken.None).ConfigureAwait(true);
     }
 
     private RenderFragment<SettingPageModel> RenderPage => page => builder =>

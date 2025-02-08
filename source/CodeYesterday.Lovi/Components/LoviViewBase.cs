@@ -1,6 +1,5 @@
 ﻿using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
-using CodeYesterday.Lovi.Session;
 using Microsoft.AspNetCore.Components;
 
 namespace CodeYesterday.Lovi.Components;
@@ -11,6 +10,9 @@ namespace CodeYesterday.Lovi.Components;
 [PublicAPI]
 public abstract class LoviViewBase : ComponentBase
 {
+    [CascadingParameter]
+    public ViewModel ViewModel { get; set; } = default!;
+
     /// <summary>
     /// Gets the internal view manager.
     /// </summary>
@@ -18,10 +20,10 @@ public abstract class LoviViewBase : ComponentBase
     protected IViewManagerInternal ViewManagerInternal { get; set; } = default!;
 
     /// <summary>
-    /// Gets the <see cref="AppModel"/>.
+    /// Gets the <see cref="Services.SessionService"/>.
     /// </summary>
     [Inject]
-    protected AppModel Model { get; set; } = default!;
+    protected ISessionService SessionService { get; set; } = default!;
 
     /// <summary>
     /// Gets the <see cref="ISettingsService"/>.
@@ -33,11 +35,6 @@ public abstract class LoviViewBase : ComponentBase
     /// Get the <see cref="IViewManager"/>.
     /// </summary>
     protected IViewManager ViewManager => ViewManagerInternal;
-
-    /// <summary>
-    /// Gets the current <see cref="LogSession"/>. If <see langword="null"/> then no session is loaded.
-    /// </summary>
-    protected LogSession? Session => Model.Session;
 
     /// <summary>
     /// The pane/view is about to be opened.

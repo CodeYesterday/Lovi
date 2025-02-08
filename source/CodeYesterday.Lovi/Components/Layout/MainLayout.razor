@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using CodeYesterday.Lovi.Models
+@inherits LayoutComponentBase
 
 <HeadContent>
     @* <RadzenTheme Theme="@SettingsService.Settings.Theme" /> not working in Blazor MAUI hybrid *@
@@ -8,21 +9,51 @@
 @* Do not render anything on 1st render because theme styles have not been loaded yet. *@
 @if (!FirstRender)
 {
-    <RadzenComponents/>
+    <RadzenComponents />
 
     <CascadingValue Value="@InputHandler">
         <CascadingValue Value="@StatusBar">
             <RadzenLayout>
                 <RadzenHeader style="--rz-header-min-height: 0px;">
-                    <AppToolbar/>
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0">
+                        <AppToolbar />
+
+                        <RadzenSelectBar TValue="ViewModel" Value="@ViewManagerInternal.SelectedView" Change="OnViewChanged">
+                            <Items>
+                                @foreach (var view in ViewManagerInternal.Views.OrderBy(v => v.SortOrder))
+                                {
+                                    <RadzenSelectBarItem Value="@view">
+                                        <Template>
+                                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5em">
+                                                <RadzenIcon Icon="@view.Icon" />
+                                                @view.Title
+                                                @if (view.CanClose)
+                                                {
+                                                    <RadzenButton ButtonStyle="ButtonStyle.Base"
+                                                                  Variant="Variant.Text"
+                                                                  Size="ButtonSize.ExtraSmall"
+                                                                  Icon="close"
+                                                                  Click="_ => OnCloseView(view)"
+                                                                  Style="border: none;" />
+                                                }
+                                            </RadzenStack>
+                                        </Template>
+                                    </RadzenSelectBarItem>
+                                }
+                            </Items>
+                        </RadzenSelectBar>
+
+                    </RadzenStack>
                 </RadzenHeader>
 
                 <RadzenBody class="h-100 no-scroll-y rz-p-0">
-                    @Body
+                    <CascadingValue Value="@ViewManagerInternal.SelectedView">
+                        @Body
+                    </CascadingValue>
                 </RadzenBody>
 
                 <RadzenFooter class="rz-p-2">
-                    <StatusBar/>
+                    <StatusBar />
                 </RadzenFooter>
             </RadzenLayout>
         </CascadingValue>

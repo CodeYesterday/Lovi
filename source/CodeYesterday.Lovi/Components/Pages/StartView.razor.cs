@@ -1,4 +1,5 @@
 ﻿using CodeYesterday.Lovi.Extensions;
+using CodeYesterday.Lovi.Models;
 using CodeYesterday.Lovi.Services;
 using CodeYesterday.Lovi.Session;
 using CommunityToolkit.Maui.Storage;
@@ -28,22 +29,6 @@ public partial class StartView
 
     public override async Task OnOpenedAsync(CancellationToken cancellationToken)
     {
-
-        if (Model.Session is not null)
-        {
-            try
-            {
-                await Model.Session
-                    .UnloadDataAsync(CancellationToken.None)
-                    .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
-            }
-            catch
-            {
-                // ignored
-            }
-
-            Model.Session = null;
-        }
         await base
             .OnOpenedAsync(cancellationToken)
             .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
@@ -137,19 +122,21 @@ public partial class StartView
 
     private async Task OnNewSessionAsync(string sessionDirectory)
     {
-        var session = new LogSession(sessionDirectory)
-        {
-            ImporterManager = ImporterManager
-        };
+        var session = SessionService.CreateSession(sessionDirectory, ImporterManager);
 
         await session.CreateNewSessionAsync(LogSession.InMemorySessionDataStorageId, CancellationToken.None)
             .ConfigureAwait(true);
 
         MruService.SetMruSessionDirectory(session.SessionDirectory);
 
-        Model.Session = session;
+        var view = new ViewModel
+        {
+            Type = ViewType.SessionConfig,
+            SessionId = session.SessionId,
+            CustomTitle = sessionDirectory
+        };
 
-        await ViewManager.NavigateToAsync(ViewId.SessionConfig, CancellationToken.None).ConfigureAwait(true);
+        await ViewManager.AddViewAsync(view, true, false, CancellationToken.None).ConfigureAwait(true);
     }
 
     private async Task OnOpenSession(bool openConfigView)
@@ -225,33 +212,33 @@ public partial class StartView
         {
             DisableButtons = true;
 
-            var session = new LogSession(sessionDirectory)
-            {
-                ImporterManager = ImporterManager
-            };
+            var session = SessionService.CreateSession(sessionDirectory, ImporterManager);
 
             await session.OpenSessionAsync(CancellationToken.None).ConfigureAwait(true);
 
             MruService.SetMruSessionDirectory(session.SessionDirectory);
 
-            ViewId viewId;
+            ViewType viewType;
 
             if (openConfigView)
             {
-                Model.Session = session;
-
-                viewId = ViewId.SessionConfig;
+                viewType = ViewType.SessionConfig;
             }
             else
             {
                 await session.ImportDataAsync(ProgressIndicator, CancellationToken.None).ConfigureAwait(true);
 
-                viewId = ViewId.LogView;
+                viewType = ViewType.LogView;
             }
 
-            Model.Session = session;
+            var view = new ViewModel
+            {
+                Type = viewType,
+                SessionId = session.SessionId,
+                CustomTitle = sessionDirectory
+            };
 
-            await ViewManager.NavigateToAsync(viewId, CancellationToken.None).ConfigureAwait(true);
+            await ViewManager.AddViewAsync(view, true, false, CancellationToken.None).ConfigureAwait(true);
         }
         catch (Exception ex)
         {

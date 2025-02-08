@@ -302,6 +302,8 @@ internal class InMemorySessionDataStorage : ISessionDataStorage
             return Task.FromResult(GetItemAndIndexOf(data, x => x.LogEvent.Timestamp == timestamp));
         }
 
+        if (!data.Any()) return Task.FromResult(((LogItemModel item, int index)?)null);
+
         var e = data as IEnumerable<LogItemModel>;
         return Task.FromResult<(LogItemModel item, int index)?>(e
             .Select((item, index) => (item, index))

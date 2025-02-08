@@ -1,5 +1,5 @@
-﻿using CodeYesterday.Lovi.Components;
-using CodeYesterday.Lovi.Components.Pages;
+﻿using CodeYesterday.Lovi.Components.Pages;
+using CodeYesterday.Lovi.Components.Panes;
 using CodeYesterday.Lovi.Input;
 using CodeYesterday.Lovi.Models;
 using Microsoft.AspNetCore.Components;
@@ -12,14 +12,7 @@ namespace CodeYesterday.Lovi.Services;
 
 internal class ViewManager : IViewManagerInternal
 {
-    private static readonly Dictionary<ViewId, string> Views = new()
-    {
-        { ViewId.StartView, "/" },
-        { ViewId.SessionConfig, "/session_config" },
-        { ViewId.LogView, "/log" },
-        { ViewId.Settings, "/settings" }
-    };
-
+    private readonly ISessionService _sessionService;
     private readonly List<LoviPane> _panes = new();
 
     private NavigationManager? _navigationManager;
@@ -29,33 +22,87 @@ internal class ViewManager : IViewManagerInternal
     private KeyboardShortcut[]? _shortcuts;
     private StatusBarItem[]? _statusBarItems;
 
-    public ViewId? PreviousViewId { get; private set; }
+    public LoviView? CurrentView { get; internal set; }
 
-    public ViewId CurrentViewId { get; private set; } = ViewId.StartView;
+    public ViewModel? SelectedView => GetSelectedView();
 
-    public LoviView? CurrentView { get; private set; }
+    public IList<ViewModel> Views { get; } = new List<ViewModel>();
 
-    public Task NavigateToAsync(ViewId id, CancellationToken cancellationToken)
+    public event EventHandler? ViewsChanged;
+
+    public ViewManager(ISessionService sessionService)
+    {
+        _sessionService = sessionService;
+        Views.Add(new() { Type = ViewType.StartView });
+    }
+
+    public ViewModel? GetView(ViewType type, int sessionId = 0)
+    {
+        return Views.FirstOrDefault(v => v.Type == type && v.SessionId == sessionId);
+    }
+
+    public Task ShowViewAsync(ViewModel view, bool closeCurrentView, CancellationToken cancellationToken)
     {
         CheckInitialized();
 
-        if (!Views.TryGetValue(id, out var uri)) throw new ArgumentOutOfRangeException(nameof(id), id, null);
+        if (!Views.Contains(view)) return Task.CompletedTask;
+        if (view.Equals(SelectedView)) return Task.CompletedTask;
 
-        PreviousViewId = CurrentViewId;
-        CurrentViewId = id;
+        var currentView = SelectedView;
+        if (closeCurrentView && currentView is not null)
+        {
+            Views.Remove(currentView);
 
-        _navigationManager.NavigateTo(uri);
+            ViewsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        _navigationManager.NavigateTo(view.Uri);
 
         return Task.CompletedTask;
     }
 
-    public async Task<bool> NavigateBackAsync(CancellationToken cancellationToken)
+    public Task AddViewAsync(ViewModel view, bool show, bool closeCurrentView, CancellationToken cancellationToken)
     {
-        if (!PreviousViewId.HasValue) return false;
+        CheckInitialized();
 
-        await NavigateToAsync(PreviousViewId.Value, cancellationToken).ConfigureAwait(true);
+        Views.Add(view);
 
-        return true;
+        ViewsChanged?.Invoke(this, EventArgs.Empty);
+
+        if (show)
+        {
+            return ShowViewAsync(view, closeCurrentView, cancellationToken);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public async Task CloseViewAsync(ViewModel view, CancellationToken cancellationToken)
+    {
+        var currentView = SelectedView;
+        Views.Remove(view);
+
+        ViewsChanged?.Invoke(this, EventArgs.Empty);
+
+        if (view.IsSessionView && !Views.Any(v => v.IsSessionView && v.SessionId == view.SessionId))
+        {
+            await _sessionService.CloseSessionAsync(view.SessionId)
+                .ConfigureAwait(true);
+        }
+
+        if (view.Equals(currentView))
+        {
+            var newView =
+                (view.SessionId > 0 ? Views.FirstOrDefault(v => v.SessionId == view.SessionId) : null) ??
+                ((short)view.Type < 0 ? Views.MaxBy(v => v.SortOrder) : null) ??
+                Views.FirstOrDefault();
+
+            if (newView is not null)
+            {
+                await ShowViewAsync(newView, false, cancellationToken)
+                    .ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
+            }
+        }
     }
 
     public Task Refresh(CancellationToken cancellationToken)
@@ -65,10 +112,22 @@ internal class ViewManager : IViewManagerInternal
         // reset the navigation manager, since we will get a new one.
         var navigationManager = _navigationManager;
 
-        var uri = "/" + navigationManager.ToBaseRelativePath(navigationManager.Uri);
+        var uri = GetCurrentLocalUri();
         navigationManager.NavigateTo(uri, true);
 
         return Task.CompletedTask;
+    }
+
+    private ViewModel? GetSelectedView()
+    {
+        var uri = GetCurrentLocalUri();
+        return Views.FirstOrDefault(v => string.Equals(v.Uri, uri, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string GetCurrentLocalUri()
+    {
+        if (_navigationManager is null) return string.Empty;
+        return "/" + _navigationManager.ToBaseRelativePath(_navigationManager.Uri);
     }
 
     public void SetNavigationManager(NavigationManager navigationManager)

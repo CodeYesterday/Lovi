@@ -6,39 +6,41 @@
 <RadzenSplitter Orientation="Orientation.Horizontal" class="h-100 w-100 no-scroll-x no-scroll-y"
                 Collapse="OnCollapse" Expand="OnExpand" Resize="OnPaneResize">
 
-    <RadzenSplitterPane @ref="_leftPane" Size="@(LeftPaneWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="true" Collapsed="@(LeftPane?.IsVisible is not true)" 
-                        BarVisible="@(LeftPane is not null)">
-        @LeftPane?.Content
-    </RadzenSplitterPane>
+    <CascadingValue Value="@SessionId" Name="SessionId">
+        <RadzenSplitterPane @ref="_leftPane" Size="@(LeftPaneWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="true" Collapsed="@(LeftPane?.IsVisible is not true)"
+                            BarVisible="@(LeftPane is not null)">
+            @LeftPane?.Content
+        </RadzenSplitterPane>
 
-    <RadzenSplitterPane @ref="_centerPaneHorz" Size="@(CenterPaneWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="false">
+        <RadzenSplitterPane @ref="_centerPaneHorz" Size="@(CenterPaneWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="false">
 
-        <RadzenSplitter Orientation="Orientation.Vertical"
-                        Collapse="OnCollapse" Expand="OnExpand" Resize="OnPaneResize">
+            <RadzenSplitter Orientation="Orientation.Vertical"
+                            Collapse="OnCollapse" Expand="OnExpand" Resize="OnPaneResize">
 
-            <RadzenSplitterPane @ref="_topPane" Size="@(TopPaneHeight.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="true" Collapsed="@(TopPane?.IsVisible is not true)"
-                                BarVisible="@(TopPane is not null)">
-                @TopPane?.Content
-            </RadzenSplitterPane>
+                <RadzenSplitterPane @ref="_topPane" Size="@(TopPaneHeight.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="true" Collapsed="@(TopPane?.IsVisible is not true)"
+                                    BarVisible="@(TopPane is not null)">
+                    @TopPane?.Content
+                </RadzenSplitterPane>
 
-            <RadzenSplitterPane @ref="_centerPaneVert" Size="@(CenterPaneHeight.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="false">
-                <CascadingValue Value="this">
-                    @Body
-                </CascadingValue>
-            </RadzenSplitterPane>
+                <RadzenSplitterPane @ref="_centerPaneVert" Size="@(CenterPaneHeight.ToString("0.##", CultureInfo.InvariantCulture) + "%")" Collapsible="false">
+                    <CascadingValue Value="this">
+                        @Body
+                    </CascadingValue>
+                </RadzenSplitterPane>
 
-            <RadzenSplitterPane @ref="_bottomPane" Collapsible="true" Collapsed="@(BottomPane?.IsVisible is not true)"
-                                BarVisible="@(BottomPane is not null)">
-                @BottomPane?.Content
-            </RadzenSplitterPane>
+                <RadzenSplitterPane @ref="_bottomPane" Collapsible="true" Collapsed="@(BottomPane?.IsVisible is not true)"
+                                    BarVisible="@(BottomPane is not null)">
+                    @BottomPane?.Content
+                </RadzenSplitterPane>
 
-        </RadzenSplitter>
+            </RadzenSplitter>
 
-    </RadzenSplitterPane>
+        </RadzenSplitterPane>
 
-    <RadzenSplitterPane @ref="_rightPane" Collapsible="true" Collapsed="@(RightPane?.IsVisible is not true)"
-                        BarVisible="@(RightPane is not null)">
-        @RightPane?.Content
-    </RadzenSplitterPane>
+        <RadzenSplitterPane @ref="_rightPane" Collapsible="true" Collapsed="@(RightPane?.IsVisible is not true)"
+                            BarVisible="@(RightPane is not null)">
+            @RightPane?.Content
+        </RadzenSplitterPane>
+    </CascadingValue>
 
 </RadzenSplitter>

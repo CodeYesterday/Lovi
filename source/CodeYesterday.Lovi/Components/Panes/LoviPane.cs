@@ -1,4 +1,4 @@
-﻿namespace CodeYesterday.Lovi.Components;
+﻿namespace CodeYesterday.Lovi.Components.Panes;
 
 /// <summary>
 /// Base class for panes.
